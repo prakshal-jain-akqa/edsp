@@ -1,0 +1,28 @@
+.title-description {
+  margin: 0 auto;
+  max-width: 900px;
+  padding: 24px;
+}
+
+.title-description .title-description-content {
+  display: grid;
+  gap: 12px;
+}
+
+.title-description .title-description-title {
+  margin: 0;
+}
+
+.title-description .title-description-description > :first-child {
+  margin-top: 0;
+}
+
+.title-description .title-description-description > :last-child {
+  margin-bottom: 0;
+}
+
+@media (width >= 900px) {
+  .title-description {
+    padding: 32px;
+  }
+}
