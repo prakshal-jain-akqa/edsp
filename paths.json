@@ -1,0 +1,7 @@
+{
+  "mappings": [
+    "/content/edsp/:/",
+    "/content/edsp/configuration:/.helix/config.json"
+  ],
+  "includes": ["/content/edsp/", "/content/dam/edsp/"]
+}
