@@ -23,25 +23,12 @@
           "label": "Keywords"
         },
         {
-          "component": "container",
-          "name": "metadata",
-          "label": "Additional Metadata",
-          "description": "Add custom meta tags. Each entry needs a metadata name and value.",
+          "component": "text",
+          "valueType": "string",
+          "name": "custom-meta",
           "multi": true,
-          "fields": [
-            {
-              "component": "text",
-              "valueType": "string",
-              "name": "name",
-              "label": "Metadata Name"
-            },
-            {
-              "component": "text",
-              "valueType": "string",
-              "name": "value",
-              "label": "Metadata Value"
-            }
-          ]
+          "label": "Custom Metadata",
+          "description": "Add entries as name=value (e.g. robots=noindex or og:image=https://example.com/image.jpg)."
         }
       ]
     }
