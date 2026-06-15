@@ -1,7 +1,8 @@
 {
   "mappings": [
     "/content/edsp/:/",
-    "/content/edsp/configuration:/.helix/config.json"
+    "/content/edsp/configuration:/.helix/config.json",
+    "/content/edsp/metadata:/metadata"
   ],
   "includes": ["/content/edsp/", "/content/dam/edsp/"]
 }

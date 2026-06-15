@@ -216,23 +216,6 @@
     ]
   },
   {
-    "id": "metadata-item",
-    "fields": [
-      {
-        "component": "text",
-        "valueType": "string",
-        "name": "name",
-        "label": "Metadata Name"
-      },
-      {
-        "component": "text",
-        "valueType": "string",
-        "name": "value",
-        "label": "Metadata Value"
-      }
-    ]
-  },
-  {
     "id": "title-description",
     "fields": [
       {

@@ -15,8 +15,7 @@
       "hero",
       "cards",
       "columns",
-      "fragment",
-      "metadata"
+      "fragment"
     ]
   },
   {
@@ -38,12 +37,6 @@
       "image",
       "button",
       "title"
-    ]
-  },
-  {
-    "id": "metadata",
-    "components": [
-      "metadata-item"
     ]
   }
 ]
