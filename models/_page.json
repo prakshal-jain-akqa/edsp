@@ -21,14 +21,6 @@
           "name": "keywords",
           "multi": true,
           "label": "Keywords"
-        },
-        {
-          "component": "text",
-          "valueType": "string",
-          "name": "custom-meta",
-          "multi": true,
-          "label": "Custom Metadata",
-          "description": "Add entries as name=value (e.g. robots=noindex or og:image=https://example.com/image.jpg)."
         }
       ]
     }

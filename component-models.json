@@ -20,14 +20,6 @@
         "name": "keywords",
         "multi": true,
         "label": "Keywords"
-      },
-      {
-        "component": "text",
-        "valueType": "string",
-        "name": "custom-meta",
-        "multi": true,
-        "label": "Custom Metadata",
-        "description": "Add entries as name=value (e.g. robots=noindex or og:image=https://example.com/image.jpg)."
       }
     ]
   },
@@ -220,6 +212,23 @@
         "value": "",
         "label": "Text",
         "valueType": "string"
+      }
+    ]
+  },
+  {
+    "id": "metadata-item",
+    "fields": [
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "name",
+        "label": "Metadata Name"
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "value",
+        "label": "Metadata Value"
       }
     ]
   },

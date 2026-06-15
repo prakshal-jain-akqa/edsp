@@ -122,52 +122,12 @@ export function decorateMain(main) {
   decorateButtons(main);
 }
 
-const CUSTOM_META_CARRIER = 'custom-meta';
-
-/**
- * Expands flat custom-meta entries (name=value) into individual meta tags.
- * @param {Document} doc
- */
-function expandCustomMetadata(doc = document) {
-  const carriers = [...doc.head.querySelectorAll(`meta[name="${CUSTOM_META_CARRIER}"]`)];
-  if (!carriers.length) return;
-
-  const entries = [];
-  carriers.forEach((tag) => {
-    tag.content.split(',').forEach((part) => {
-      const entry = part.trim();
-      if (entry) entries.push(entry);
-    });
-  });
-
-  entries.forEach((entry) => {
-    const separatorIndex = entry.indexOf('=');
-    if (separatorIndex <= 0) return;
-
-    const metaName = entry.slice(0, separatorIndex).trim();
-    const metaValue = entry.slice(separatorIndex + 1).trim();
-    if (!metaName || !metaValue) return;
-
-    const meta = doc.createElement('meta');
-    if (metaName.includes(':')) {
-      meta.setAttribute('property', metaName);
-    } else {
-      meta.setAttribute('name', metaName);
-    }
-    meta.setAttribute('content', metaValue);
-    doc.head.append(meta);
-  });
-
-  carriers.forEach((tag) => tag.remove());
-}
-
 /**
  * Loads everything needed to get to LCP.
  * @param {Element} doc The container element
  */
 async function loadEager(doc) {
   document.documentElement.lang = 'en';
-  expandCustomMetadata(doc);
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {
