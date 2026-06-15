@@ -10,6 +10,7 @@ import {
   loadSections,
   loadCSS,
 } from './aem.js';
+import { applyMetaAuthoring } from './meta-authoring.js';
 
 /**
  * Moves all the attributes from a given elmenet to another given element.
@@ -177,7 +178,9 @@ function loadDelayed() {
 }
 
 async function loadPage() {
+  const metaAuthoring = applyMetaAuthoring();
   await loadEager(document);
+  await metaAuthoring;
   await loadLazy(document);
   loadDelayed();
 }

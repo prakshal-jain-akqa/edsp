@@ -2,7 +2,7 @@
   "mappings": [
     "/content/edsp/:/",
     "/content/edsp/configuration:/.helix/config.json",
-    "/content/edsp/metadata:/metadata"
+    "/content/edsp/meta-authoring:/meta-authoring"
   ],
   "includes": ["/content/edsp/", "/content/dam/edsp/"]
 }
