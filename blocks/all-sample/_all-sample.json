@@ -24,50 +24,58 @@
           "component": "text",
           "valueType": "string",
           "name": "text",
-          "label": "Text"
+          "label": "Text",
+          "value": "Sample text value"
         },
         {
           "component": "textarea",
           "valueType": "string",
           "name": "textarea",
-          "label": "Text Area"
+          "label": "Text Area",
+          "value": "Sample textarea content with multiple lines of dummy text."
         },
         {
           "component": "richtext",
           "valueType": "string",
           "name": "richtext",
-          "label": "Rich Text"
+          "label": "Rich Text",
+          "value": "<p>Sample <strong>rich text</strong> content.</p>"
         },
         {
           "component": "text",
           "valueType": "string",
           "name": "multiValues",
           "label": "Multi Text",
-          "multi": true
+          "multi": true,
+          "value": "First multi value"
         },
         {
           "component": "number",
           "valueType": "number",
           "name": "number",
-          "label": "Number"
+          "label": "Number",
+          "value": 42
         },
         {
           "component": "boolean",
           "valueType": "boolean",
           "name": "boolean",
-          "label": "Boolean"
+          "label": "Boolean",
+          "value": true
         },
         {
           "component": "date-time",
           "valueType": "date",
           "name": "dateTime",
-          "label": "Date Time"
+          "label": "Date Time",
+          "value": "2026-06-15T10:30:00.000Z"
         },
         {
           "component": "select",
           "valueType": "string",
           "name": "select",
           "label": "Select",
+          "value": "a",
           "options": [
             { "name": "Option A", "value": "a" },
             { "name": "Option B", "value": "b" }
@@ -78,6 +86,7 @@
           "valueType": "string",
           "name": "multiselect",
           "label": "Multiselect",
+          "value": "one,two",
           "options": [
             { "name": "One", "value": "one" },
             { "name": "Two", "value": "two" },
@@ -89,6 +98,7 @@
           "valueType": "string[]",
           "name": "checkboxGroup",
           "label": "Checkbox Group",
+          "value": ["alpha", "beta"],
           "options": [
             { "name": "Alpha", "value": "alpha" },
             { "name": "Beta", "value": "beta" }
@@ -99,6 +109,7 @@
           "valueType": "string",
           "name": "radioGroup",
           "label": "Radio Group",
+          "value": "yes",
           "options": [
             { "name": "Yes", "value": "yes" },
             { "name": "No", "value": "no" }
@@ -108,37 +119,43 @@
           "component": "reference",
           "valueType": "string",
           "name": "sampleImage",
-          "label": "Image"
+          "label": "Image",
+          "value": "/content/dam/edsp/sample.png"
         },
         {
           "component": "text",
           "valueType": "string",
           "name": "sampleImageAlt",
-          "label": "Image Alt"
+          "label": "Image Alt",
+          "value": "Sample image alt text"
         },
         {
           "component": "aem-content",
           "valueType": "string",
           "name": "sampleLink",
-          "label": "Link"
+          "label": "Link",
+          "value": "/content/edsp"
         },
         {
           "component": "text",
           "valueType": "string",
           "name": "sampleLinkText",
-          "label": "Link Text"
+          "label": "Link Text",
+          "value": "Learn more"
         },
         {
           "component": "text",
           "valueType": "string",
           "name": "sampleLinkTitle",
-          "label": "Link Title"
+          "label": "Link Title",
+          "value": "Learn more about us"
         },
         {
           "component": "select",
           "valueType": "string",
           "name": "sampleLinkType",
           "label": "Link Type",
+          "value": "primary",
           "options": [
             { "name": "Default", "value": "" },
             { "name": "Primary", "value": "primary" },
@@ -149,19 +166,22 @@
           "component": "aem-tag",
           "valueType": "string",
           "name": "aemTag",
-          "label": "AEM Tags"
+          "label": "AEM Tags",
+          "value": "edsp:sample"
         },
         {
           "component": "aem-content-fragment",
           "valueType": "string",
           "name": "contentFragment",
-          "label": "Content Fragment"
+          "label": "Content Fragment",
+          "value": "/content/dam/edsp/fragments/sample"
         },
         {
           "component": "aem-experience-fragment",
           "valueType": "string",
           "name": "experienceFragment",
-          "label": "Experience Fragment"
+          "label": "Experience Fragment",
+          "value": "/content/experience-fragments/edsp/sample/master"
         },
         {
           "component": "container",
@@ -173,13 +193,15 @@
               "component": "text",
               "valueType": "string",
               "name": "itemName",
-              "label": "Item Name"
+              "label": "Item Name",
+              "value": "Item one"
             },
             {
               "component": "text",
               "valueType": "string",
               "name": "itemValue",
-              "label": "Item Value"
+              "label": "Item Value",
+              "value": "Value one"
             }
           ]
         }
