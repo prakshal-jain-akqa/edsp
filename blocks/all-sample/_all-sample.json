@@ -118,42 +118,42 @@
         {
           "component": "reference",
           "valueType": "string",
-          "name": "sampleImage",
+          "name": "image",
           "label": "Image",
           "value": "/content/dam/edsp/sample.png"
         },
         {
           "component": "text",
           "valueType": "string",
-          "name": "sampleImageAlt",
+          "name": "imageAlt",
           "label": "Image Alt",
           "value": "Sample image alt text"
         },
         {
           "component": "aem-content",
           "valueType": "string",
-          "name": "sampleLink",
+          "name": "link",
           "label": "Link",
           "value": "/content/edsp"
         },
         {
           "component": "text",
           "valueType": "string",
-          "name": "sampleLinkText",
+          "name": "linkText",
           "label": "Link Text",
           "value": "Learn more"
         },
         {
           "component": "text",
           "valueType": "string",
-          "name": "sampleLinkTitle",
+          "name": "linkTitle",
           "label": "Link Title",
           "value": "Learn more about us"
         },
         {
           "component": "select",
           "valueType": "string",
-          "name": "sampleLinkType",
+          "name": "linkType",
           "label": "Link Type",
           "value": "primary",
           "options": [
@@ -165,21 +165,21 @@
         {
           "component": "aem-tag",
           "valueType": "string",
-          "name": "aemTag",
+          "name": "tags",
           "label": "AEM Tags",
           "value": "edsp:sample"
         },
         {
           "component": "aem-content-fragment",
           "valueType": "string",
-          "name": "contentFragment",
+          "name": "fragment",
           "label": "Content Fragment",
           "value": "/content/dam/edsp/fragments/sample"
         },
         {
           "component": "aem-experience-fragment",
           "valueType": "string",
-          "name": "experienceFragment",
+          "name": "experience",
           "label": "Experience Fragment",
           "value": "/content/experience-fragments/edsp/sample/master"
         },
