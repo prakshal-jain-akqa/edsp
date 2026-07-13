@@ -142,6 +142,235 @@
     ]
   },
   {
+    "id": "all-sample",
+    "fields": [
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "text",
+        "label": "Text",
+        "value": "Sample text value"
+      },
+      {
+        "component": "textarea",
+        "valueType": "string",
+        "name": "textarea",
+        "label": "Text Area",
+        "value": "Sample textarea content with multiple lines of dummy text."
+      },
+      {
+        "component": "richtext",
+        "valueType": "string",
+        "name": "richtext",
+        "label": "Rich Text",
+        "value": "<p>Sample <strong>rich text</strong> content.</p>"
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "multiValues",
+        "label": "Multi Text",
+        "multi": true,
+        "value": "First multi value"
+      },
+      {
+        "component": "number",
+        "valueType": "number",
+        "name": "number",
+        "label": "Number",
+        "value": 42
+      },
+      {
+        "component": "boolean",
+        "valueType": "boolean",
+        "name": "boolean",
+        "label": "Boolean",
+        "value": true
+      },
+      {
+        "component": "date-time",
+        "valueType": "date",
+        "name": "dateTime",
+        "label": "Date Time",
+        "value": "2026-06-15T10:30:00.000Z"
+      },
+      {
+        "component": "select",
+        "valueType": "string",
+        "name": "select",
+        "label": "Select",
+        "value": "a",
+        "options": [
+          {
+            "name": "Option A",
+            "value": "a"
+          },
+          {
+            "name": "Option B",
+            "value": "b"
+          }
+        ]
+      },
+      {
+        "component": "multiselect",
+        "valueType": "string",
+        "name": "multiselect",
+        "label": "Multiselect",
+        "value": "one,two",
+        "options": [
+          {
+            "name": "One",
+            "value": "one"
+          },
+          {
+            "name": "Two",
+            "value": "two"
+          },
+          {
+            "name": "Three",
+            "value": "three"
+          }
+        ]
+      },
+      {
+        "component": "checkbox-group",
+        "valueType": "string[]",
+        "name": "checkboxGroup",
+        "label": "Checkbox Group",
+        "value": [
+          "alpha",
+          "beta"
+        ],
+        "options": [
+          {
+            "name": "Alpha",
+            "value": "alpha"
+          },
+          {
+            "name": "Beta",
+            "value": "beta"
+          }
+        ]
+      },
+      {
+        "component": "radio-group",
+        "valueType": "string",
+        "name": "radioGroup",
+        "label": "Radio Group",
+        "value": "yes",
+        "options": [
+          {
+            "name": "Yes",
+            "value": "yes"
+          },
+          {
+            "name": "No",
+            "value": "no"
+          }
+        ]
+      },
+      {
+        "component": "reference",
+        "valueType": "string",
+        "name": "image",
+        "label": "Image",
+        "value": "/content/dam/edsp/sample.png"
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "imageAlt",
+        "label": "Image Alt",
+        "value": "Sample image alt text"
+      },
+      {
+        "component": "aem-content",
+        "valueType": "string",
+        "name": "link",
+        "label": "Link",
+        "value": "/content/edsp"
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "linkText",
+        "label": "Link Text",
+        "value": "Learn more"
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "linkTitle",
+        "label": "Link Title",
+        "value": "Learn more about us"
+      },
+      {
+        "component": "select",
+        "valueType": "string",
+        "name": "linkType",
+        "label": "Link Type",
+        "value": "primary",
+        "options": [
+          {
+            "name": "Default",
+            "value": ""
+          },
+          {
+            "name": "Primary",
+            "value": "primary"
+          },
+          {
+            "name": "Secondary",
+            "value": "secondary"
+          }
+        ]
+      },
+      {
+        "component": "aem-tag",
+        "valueType": "string",
+        "name": "tags",
+        "label": "AEM Tags",
+        "value": "edsp:sample"
+      },
+      {
+        "component": "aem-content-fragment",
+        "valueType": "string",
+        "name": "fragment",
+        "label": "Content Fragment",
+        "value": "/content/dam/edsp/fragments/sample"
+      },
+      {
+        "component": "aem-experience-fragment",
+        "valueType": "string",
+        "name": "experience",
+        "label": "Experience Fragment",
+        "value": "/content/experience-fragments/edsp/sample/master"
+      },
+      {
+        "component": "container",
+        "name": "containerItems",
+        "label": "Container Items",
+        "multi": true,
+        "fields": [
+          {
+            "component": "text",
+            "valueType": "string",
+            "name": "itemName",
+            "label": "Item Name",
+            "value": "Item one"
+          },
+          {
+            "component": "text",
+            "valueType": "string",
+            "name": "itemValue",
+            "label": "Item Value",
+            "value": "Value one"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "card",
     "fields": [
       {
@@ -212,6 +441,39 @@
         "value": "",
         "label": "Text",
         "valueType": "string"
+      }
+    ]
+  },
+  {
+    "id": "subscribe",
+    "fields": [
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "title",
+        "label": "Title",
+        "value": "Subscribe today, it's free."
+      },
+      {
+        "component": "richtext",
+        "valueType": "string",
+        "name": "description",
+        "label": "Description",
+        "value": "<p>Subscribe to the newsletter and never miss out on trading opportunities! Get insights from our global market analysts, along with updates on high-impact economic events, expert commentary, videos, and much more.</p>"
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "submitLabel",
+        "label": "Button Text",
+        "value": "Subscribe"
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "endpoint",
+        "label": "Form Action URL",
+        "description": "Newsletter endpoint URL. Leave empty to disable submission."
       }
     ]
   }
