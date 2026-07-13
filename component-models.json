@@ -214,5 +214,38 @@
         "valueType": "string"
       }
     ]
+  },
+  {
+    "id": "subscribe",
+    "fields": [
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "title",
+        "label": "Title",
+        "value": "Subscribe today, it's free."
+      },
+      {
+        "component": "richtext",
+        "valueType": "string",
+        "name": "description",
+        "label": "Description",
+        "value": ""
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "submitLabel",
+        "label": "Button Text",
+        "value": "Subscribe"
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "endpoint",
+        "label": "Form Action URL",
+        "description": "Newsletter endpoint URL. Leave empty to disable submission."
+      }
+    ]
   }
 ]
