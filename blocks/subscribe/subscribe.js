@@ -10,6 +10,15 @@ function getRowCell(row) {
 }
 
 /**
+ * @param {Element} cell
+ * @returns {boolean}
+ */
+function hasCellContent(cell) {
+  if (!cell) return false;
+  return Boolean(cell.textContent.trim() || cell.querySelector('img, picture, a, iframe'));
+}
+
+/**
  * @param {Element} block
  */
 export default function decorate(block) {
@@ -34,11 +43,15 @@ export default function decorate(block) {
   heading.textContent = title;
   if (titleCell) moveInstrumentation(titleCell, heading);
 
-  const description = document.createElement('div');
-  description.className = 'subscribe-description';
-  if (descriptionCell) {
+  const fragment = document.createDocumentFragment();
+  fragment.append(heading);
+
+  if (hasCellContent(descriptionCell)) {
+    const description = document.createElement('div');
+    description.className = 'subscribe-description';
     description.append(...descriptionCell.childNodes);
     moveInstrumentation(descriptionCell, description);
+    fragment.append(description);
   }
 
   const form = document.createElement('form');
@@ -48,22 +61,15 @@ export default function decorate(block) {
   const field = document.createElement('div');
   field.className = 'subscribe-field';
 
-  const label = document.createElement('label');
-  label.className = 'subscribe-label';
-
-  const labelText = document.createElement('span');
-  labelText.className = 'subscribe-label-text';
-  labelText.textContent = 'Email';
-
   const input = document.createElement('input');
   input.type = 'email';
   input.name = 'email';
+  input.id = `subscribe-email-${crypto.randomUUID()}`;
   input.required = true;
   input.autocomplete = 'email';
   input.placeholder = 'Email';
   input.setAttribute('aria-label', 'Email');
-  label.append(labelText, input);
-  field.append(label);
+  field.append(input);
 
   const button = document.createElement('button');
   button.type = 'submit';
@@ -82,5 +88,6 @@ export default function decorate(block) {
     });
   }
 
-  block.replaceChildren(heading, description, form);
+  fragment.append(form);
+  block.replaceChildren(fragment);
 }

@@ -32,7 +32,7 @@
           "valueType": "string",
           "name": "description",
           "label": "Description",
-          "value": ""
+          "value": "<p>Subscribe to the newsletter and never miss out on trading opportunities! Get insights from our global market analysts, along with updates on high-impact economic events, expert commentary, videos, and much more.</p>"
         },
         {
           "component": "text",
