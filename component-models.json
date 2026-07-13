@@ -142,6 +142,245 @@
     ]
   },
   {
+    "id": "all-sample",
+    "fields": [
+      {
+        "component": "tab",
+        "name": "basicTab",
+        "label": "Basic",
+        "fields": [
+          {
+            "component": "text",
+            "valueType": "string",
+            "name": "text",
+            "label": "Text"
+          },
+          {
+            "component": "textarea",
+            "valueType": "string",
+            "name": "textarea",
+            "label": "Text Area"
+          },
+          {
+            "component": "richtext",
+            "valueType": "string",
+            "name": "richtext",
+            "label": "Rich Text"
+          },
+          {
+            "component": "text",
+            "valueType": "string",
+            "name": "multiText",
+            "label": "Multi Text",
+            "multi": true
+          }
+        ]
+      },
+      {
+        "component": "tab",
+        "name": "inputTab",
+        "label": "Input",
+        "fields": [
+          {
+            "component": "number",
+            "valueType": "number",
+            "name": "number",
+            "label": "Number"
+          },
+          {
+            "component": "boolean",
+            "valueType": "boolean",
+            "name": "boolean",
+            "label": "Boolean"
+          },
+          {
+            "component": "date-time",
+            "valueType": "date",
+            "name": "dateTime",
+            "label": "Date Time"
+          }
+        ]
+      },
+      {
+        "component": "tab",
+        "name": "choiceTab",
+        "label": "Choice",
+        "fields": [
+          {
+            "component": "select",
+            "valueType": "string",
+            "name": "select",
+            "label": "Select",
+            "options": [
+              {
+                "name": "Option A",
+                "value": "a"
+              },
+              {
+                "name": "Option B",
+                "value": "b"
+              }
+            ]
+          },
+          {
+            "component": "multiselect",
+            "valueType": "string",
+            "name": "multiselect",
+            "label": "Multiselect",
+            "options": [
+              {
+                "name": "One",
+                "value": "one"
+              },
+              {
+                "name": "Two",
+                "value": "two"
+              },
+              {
+                "name": "Three",
+                "value": "three"
+              }
+            ]
+          },
+          {
+            "component": "checkbox-group",
+            "valueType": "string[]",
+            "name": "checkboxGroup",
+            "label": "Checkbox Group",
+            "options": [
+              {
+                "name": "Alpha",
+                "value": "alpha"
+              },
+              {
+                "name": "Beta",
+                "value": "beta"
+              }
+            ]
+          },
+          {
+            "component": "radio-group",
+            "valueType": "string",
+            "name": "radioGroup",
+            "label": "Radio Group",
+            "options": [
+              {
+                "name": "Yes",
+                "value": "yes"
+              },
+              {
+                "name": "No",
+                "value": "no"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "component": "tab",
+        "name": "referenceTab",
+        "label": "Reference",
+        "fields": [
+          {
+            "component": "reference",
+            "valueType": "string",
+            "name": "sampleImage",
+            "label": "Image"
+          },
+          {
+            "component": "text",
+            "valueType": "string",
+            "name": "sampleImageAlt",
+            "label": "Image Alt"
+          },
+          {
+            "component": "aem-content",
+            "valueType": "string",
+            "name": "sampleLink",
+            "label": "Link"
+          },
+          {
+            "component": "text",
+            "valueType": "string",
+            "name": "sampleLinkText",
+            "label": "Link Text"
+          },
+          {
+            "component": "text",
+            "valueType": "string",
+            "name": "sampleLinkTitle",
+            "label": "Link Title"
+          },
+          {
+            "component": "select",
+            "valueType": "string",
+            "name": "sampleLinkType",
+            "label": "Link Type",
+            "options": [
+              {
+                "name": "Default",
+                "value": ""
+              },
+              {
+                "name": "Primary",
+                "value": "primary"
+              },
+              {
+                "name": "Secondary",
+                "value": "secondary"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "component": "tab",
+        "name": "aemTab",
+        "label": "AEM",
+        "fields": [
+          {
+            "component": "aem-tag",
+            "valueType": "string",
+            "name": "aemTag",
+            "label": "AEM Tags"
+          },
+          {
+            "component": "aem-content-fragment",
+            "valueType": "string",
+            "name": "contentFragment",
+            "label": "Content Fragment"
+          },
+          {
+            "component": "aem-experience-fragment",
+            "valueType": "string",
+            "name": "experienceFragment",
+            "label": "Experience Fragment"
+          },
+          {
+            "component": "container",
+            "name": "containerItems",
+            "label": "Container Items",
+            "multi": true,
+            "fields": [
+              {
+                "component": "text",
+                "valueType": "string",
+                "name": "itemName",
+                "label": "Item Name"
+              },
+              {
+                "component": "text",
+                "valueType": "string",
+                "name": "itemValue",
+                "label": "Item Value"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "card",
     "fields": [
       {

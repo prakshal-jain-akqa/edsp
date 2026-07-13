@@ -51,7 +51,8 @@
         "cards",
         "columns",
         "fragment",
-        "subscribe"
+        "subscribe",
+        "all-sample"
       ]
     }
   ]

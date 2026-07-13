@@ -1,18 +1,29 @@
 import { moveInstrumentation } from '../../scripts/scripts.js';
 
 /**
+ * AEM renders one model field per block row: block > div(row) > div(cell) > content.
+ * @param {Element} row
+ * @returns {Element|undefined}
+ */
+function getRowCell(row) {
+  return row?.firstElementChild ?? undefined;
+}
+
+/**
  * @param {Element} block
  */
 export default function decorate(block) {
-  const row = block.firstElementChild;
-  if (!row) return;
-
   const [
-    titleCell,
-    descriptionCell,
-    submitLabelCell,
-    endpointCell,
-  ] = [...row.children];
+    titleRow,
+    descriptionRow,
+    submitLabelRow,
+    endpointRow,
+  ] = [...block.children];
+
+  const titleCell = getRowCell(titleRow);
+  const descriptionCell = getRowCell(descriptionRow);
+  const submitLabelCell = getRowCell(submitLabelRow);
+  const endpointCell = getRowCell(endpointRow);
 
   const title = titleCell?.textContent.trim() || '';
   const submitLabel = submitLabelCell?.textContent.trim() || 'Subscribe';
@@ -21,7 +32,7 @@ export default function decorate(block) {
   const heading = document.createElement('h2');
   heading.className = 'subscribe-title';
   heading.textContent = title;
-  moveInstrumentation(titleCell, heading);
+  if (titleCell) moveInstrumentation(titleCell, heading);
 
   const description = document.createElement('div');
   description.className = 'subscribe-description';
@@ -58,7 +69,7 @@ export default function decorate(block) {
   button.type = 'submit';
   button.className = 'subscribe-button';
   button.textContent = submitLabel;
-  moveInstrumentation(submitLabelCell, button);
+  if (submitLabelCell) moveInstrumentation(submitLabelCell, button);
 
   form.append(field, button);
 
