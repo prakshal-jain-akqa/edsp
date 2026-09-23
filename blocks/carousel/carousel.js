@@ -242,8 +242,13 @@ function buildSlide(row) {
  */
 function enableCarousel(track, slides, prevBtn, nextBtn) {
   let index = 0;
+  let suppressClick = false;
+  const dragThreshold = 48;
 
-  const goTo = (nextIndex) => {
+  /** @type {{ pointerId: number, startX: number, startScroll: number, moved: boolean } | null} */
+  let drag = null;
+
+  const goTo = (nextIndex, behavior = "smooth") => {
     index = wrapIndex(nextIndex, slides.length);
 
     slides.forEach((slide, i) => {
@@ -260,8 +265,71 @@ function enableCarousel(track, slides, prevBtn, nextBtn) {
       + slideRect.width / 2
       - (trackRect.left + trackRect.width / 2)
       + track.scrollLeft;
-    track.scrollTo({ left: offset, behavior: "smooth" });
+    track.scrollTo({ left: offset, behavior });
   };
+
+  const endDrag = (event) => {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+
+    const { startX, moved } = drag;
+    const dx = event.clientX - startX;
+    drag = null;
+    track.classList.remove("is-dragging");
+
+    try {
+      track.releasePointerCapture(event.pointerId);
+    } catch {
+      // already released
+    }
+
+    if (moved) {
+      suppressClick = true;
+      if (Math.abs(dx) >= dragThreshold) {
+        goTo(index + (dx < 0 ? 1 : -1));
+      } else {
+        goTo(index);
+      }
+      return;
+    }
+
+    goTo(index);
+  };
+
+  track.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) return;
+    if (event.target.closest("a, button")) return;
+
+    drag = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startScroll: track.scrollLeft,
+      moved: false,
+    };
+    track.classList.add("is-dragging");
+    track.setPointerCapture(event.pointerId);
+  });
+
+  track.addEventListener("pointermove", (event) => {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+
+    const dx = event.clientX - drag.startX;
+    if (Math.abs(dx) > 6) drag.moved = true;
+    track.scrollLeft = drag.startScroll - dx;
+  });
+
+  track.addEventListener("pointerup", endDrag);
+  track.addEventListener("pointercancel", endDrag);
+
+  track.addEventListener(
+    "click",
+    (event) => {
+      if (!suppressClick) return;
+      event.preventDefault();
+      event.stopPropagation();
+      suppressClick = false;
+    },
+    true,
+  );
 
   prevBtn.addEventListener("click", () => goTo(index - 1));
   nextBtn.addEventListener("click", () => goTo(index + 1));
@@ -285,7 +353,7 @@ function enableCarousel(track, slides, prevBtn, nextBtn) {
     }
   });
 
-  goTo(0);
+  goTo(0, "auto");
 }
 
 /**

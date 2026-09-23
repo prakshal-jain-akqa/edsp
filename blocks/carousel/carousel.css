@@ -112,6 +112,15 @@ main .section.carousel-container > .carousel-wrapper {
   padding: 0 calc((100% - var(--carousel-slide-width)) / 2);
   scrollbar-width: none;
   outline: none;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.carousel .carousel-track.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  scroll-behavior: auto;
 }
 
 .carousel .carousel-track::-webkit-scrollbar {
@@ -129,6 +138,10 @@ main .section.carousel-container > .carousel-wrapper {
   isolation: isolate;
 }
 
+.carousel .carousel-track.is-dragging .carousel-slide {
+  cursor: grabbing;
+}
+
 .carousel .carousel-media,
 .carousel .carousel-media picture,
 .carousel .carousel-media img {
@@ -140,6 +153,8 @@ main .section.carousel-container > .carousel-wrapper {
 
 .carousel .carousel-media img {
   object-fit: cover;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 .carousel .carousel-overlay {
