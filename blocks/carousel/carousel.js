@@ -18,6 +18,14 @@ function findLink(cell) {
 }
 
 /**
+ * @param {Element} row
+ * @returns {boolean}
+ */
+function isSlideRow(row) {
+  return Boolean(row.querySelector('picture, img')) || row.children.length > 1;
+}
+
+/**
  * @param {number} index
  * @param {number} length
  * @returns {number}
@@ -28,59 +36,48 @@ function wrapIndex(index, length) {
 }
 
 /**
- * Header comes from default content in the same section (Title / Text / Button),
- * matching how Cards keeps the parent as a filter-only container.
- * @param {Element} block
+ * Flat model fields render as one row each; slide container items follow.
+ * @param {Element[]} headerRows
  * @returns {HTMLElement}
  */
-function buildHeaderFromSection(block) {
+function buildHeader(headerRows) {
   const header = document.createElement('div');
   header.className = 'carousel-header';
 
   const copy = document.createElement('div');
   copy.className = 'carousel-copy';
+
+  const [headingRow, subheadingRow, buttonRow] = headerRows;
+  const headingCell = headingRow?.firstElementChild;
+  const subheadingCell = subheadingRow?.firstElementChild;
+  const buttonCell = buttonRow?.firstElementChild;
+
+  if (cellText(subheadingCell)) {
+    const subheading = document.createElement('p');
+    subheading.className = 'carousel-subheading';
+    subheading.textContent = cellText(subheadingCell);
+    moveInstrumentation(subheadingCell, subheading);
+    copy.append(subheading);
+  }
+
+  if (cellText(headingCell)) {
+    const heading = document.createElement('h2');
+    heading.className = 'carousel-heading';
+    heading.textContent = cellText(headingCell);
+    moveInstrumentation(headingCell, heading);
+    copy.append(heading);
+  }
+
   header.append(copy);
 
-  const section = block.closest('.section');
-  const defaultContent = section?.querySelector(':scope > .default-content-wrapper');
-  if (!defaultContent) return header;
-
-  const heading = defaultContent.querySelector('h1, h2, h3, h4, h5, h6');
-  const button = defaultContent.querySelector('p.button-wrapper a, p.button-container a, a.button');
-  const eyebrowEl = [...defaultContent.querySelectorAll('p')].find((p) => {
-    if (p.querySelector('a')) return false;
-    const text = cellText(p);
-    return text && text.length <= 40;
-  });
-
-  if (eyebrowEl) {
-    const eyebrow = document.createElement('p');
-    eyebrow.className = 'carousel-eyebrow';
-    eyebrow.textContent = cellText(eyebrowEl);
-    copy.append(eyebrow);
-    eyebrowEl.remove();
-  }
-
-  if (heading) {
-    const title = document.createElement('h2');
-    title.className = 'carousel-title';
-    title.textContent = cellText(heading);
-    copy.append(title);
-    heading.remove();
-  }
-
-  if (button) {
+  const buttonLink = findLink(buttonCell);
+  if (buttonLink) {
     const actions = document.createElement('div');
     actions.className = 'carousel-actions';
-    const discover = button.cloneNode(true);
-    discover.className = 'carousel-discover';
-    actions.append(discover);
+    buttonLink.className = 'carousel-discover';
+    if (buttonCell) moveInstrumentation(buttonCell, buttonLink);
+    actions.append(buttonLink);
     header.append(actions);
-    button.closest('p')?.remove();
-  }
-
-  if (!defaultContent.querySelector('h1, h2, h3, h4, h5, h6, p, a, ul, ol')) {
-    defaultContent.remove();
   }
 
   return header;
@@ -88,9 +85,11 @@ function buildHeaderFromSection(block) {
 
 /**
  * @param {Element} row
- * @returns {HTMLElement}
+ * @returns {HTMLElement|null}
  */
 function buildSlide(row) {
+  if (!row.querySelector('picture, img') && !cellText(row)) return null;
+
   const slide = document.createElement('article');
   slide.className = 'carousel-slide';
   slide.setAttribute('role', 'group');
@@ -207,8 +206,18 @@ function enableCarousel(track, slides, prevBtn, nextBtn) {
  * @param {Element} block
  */
 export default function decorate(block) {
-  const slideRows = [...block.children];
-  const header = buildHeaderFromSection(block);
+  const rows = [...block.children];
+  const firstSlideIndex = rows.findIndex(isSlideRow);
+  const headerRows = firstSlideIndex === -1 ? rows : rows.slice(0, firstSlideIndex);
+  const slideRows = firstSlideIndex === -1 ? [] : rows.slice(firstSlideIndex);
+
+  // Model order is heading, subheading, link — render subheading above heading.
+  const orderedHeaderRows = [
+    headerRows[0],
+    headerRows[1],
+    headerRows[2],
+  ];
+  const header = buildHeader(orderedHeaderRows);
 
   const stage = document.createElement('div');
   stage.className = 'carousel-stage';
@@ -218,9 +227,9 @@ export default function decorate(block) {
   track.setAttribute('tabindex', '0');
   track.setAttribute('role', 'region');
   track.setAttribute('aria-roledescription', 'carousel');
-  track.setAttribute('aria-label', header.querySelector('.carousel-title')?.textContent || 'Carousel');
+  track.setAttribute('aria-label', cellText(headerRows[0]?.firstElementChild) || 'Carousel');
 
-  const slides = slideRows.map(buildSlide);
+  const slides = slideRows.map(buildSlide).filter(Boolean);
   slides.forEach((slide) => track.append(slide));
 
   const prevBtn = document.createElement('button');

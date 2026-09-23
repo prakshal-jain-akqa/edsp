@@ -26,12 +26,6 @@
     ]
   },
   {
-    "id": "carousel",
-    "components": [
-      "slide"
-    ]
-  },
-  {
     "id": "columns",
     "components": [
       "column"

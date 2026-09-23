@@ -46,7 +46,7 @@ main .section.carousel-container > .carousel-wrapper {
   max-width: 36rem;
 }
 
-.carousel .carousel-eyebrow {
+.carousel .carousel-subheading {
   margin: 0 0 10px;
   color: var(--carousel-muted);
   font-family: var(--body-font-family);
@@ -57,7 +57,7 @@ main .section.carousel-container > .carousel-wrapper {
   text-transform: uppercase;
 }
 
-.carousel .carousel-title {
+.carousel .carousel-heading {
   margin: 0;
   color: var(--carousel-text);
   font-family: var(--body-font-family);

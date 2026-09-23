@@ -161,48 +161,83 @@
     ]
   },
   {
-    "id": "slide",
+    "id": "carousel",
     "fields": [
       {
-        "component": "reference",
+        "component": "text",
         "valueType": "string",
-        "name": "image",
-        "label": "Image",
-        "multi": false
+        "name": "heading",
+        "label": "Heading",
+        "value": "Progress Beyond the Road"
       },
       {
         "component": "text",
         "valueType": "string",
-        "name": "imageAlt",
-        "label": "Image Alt",
-        "value": ""
-      },
-      {
-        "component": "text",
-        "valueType": "string",
-        "name": "title",
-        "label": "Title",
-        "value": "Environment Conservation"
-      },
-      {
-        "component": "richtext",
-        "valueType": "string",
-        "name": "description",
-        "label": "Description",
-        "value": ""
+        "name": "subheading",
+        "label": "Subheading",
+        "value": "THE IMPACT"
       },
       {
         "component": "aem-content",
         "valueType": "string",
         "name": "link",
-        "label": "Link"
+        "label": "Button Link"
       },
       {
         "component": "text",
         "valueType": "string",
         "name": "linkText",
-        "label": "Link Text",
-        "value": "View"
+        "label": "Button Text",
+        "value": "Discover All"
+      },
+      {
+        "component": "container",
+        "name": "slides",
+        "label": "Slides",
+        "multi": true,
+        "fields": [
+          {
+            "component": "reference",
+            "valueType": "string",
+            "name": "image",
+            "label": "Image",
+            "multi": false
+          },
+          {
+            "component": "text",
+            "valueType": "string",
+            "name": "imageAlt",
+            "label": "Image Alt",
+            "value": ""
+          },
+          {
+            "component": "text",
+            "valueType": "string",
+            "name": "title",
+            "label": "Slide Title",
+            "value": "Environment Conservation"
+          },
+          {
+            "component": "richtext",
+            "valueType": "string",
+            "name": "description",
+            "label": "Slide Description",
+            "value": ""
+          },
+          {
+            "component": "aem-content",
+            "valueType": "string",
+            "name": "cta",
+            "label": "Slide Link"
+          },
+          {
+            "component": "text",
+            "valueType": "string",
+            "name": "ctaText",
+            "label": "Slide Link Text",
+            "value": "View"
+          }
+        ]
       }
     ]
   },
