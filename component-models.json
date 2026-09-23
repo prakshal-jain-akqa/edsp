@@ -161,39 +161,7 @@
     ]
   },
   {
-    "id": "carousel",
-    "fields": [
-      {
-        "component": "text",
-        "valueType": "string",
-        "name": "eyebrow",
-        "label": "Eyebrow",
-        "value": "THE IMPACT"
-      },
-      {
-        "component": "text",
-        "valueType": "string",
-        "name": "title",
-        "label": "Title",
-        "value": "Progress Beyond the Road"
-      },
-      {
-        "component": "aem-content",
-        "valueType": "string",
-        "name": "link",
-        "label": "Discover Link"
-      },
-      {
-        "component": "text",
-        "valueType": "string",
-        "name": "linkText",
-        "label": "Discover Link Text",
-        "value": "Discover All"
-      }
-    ]
-  },
-  {
-    "id": "carousel-item",
+    "id": "slide",
     "fields": [
       {
         "component": "reference",

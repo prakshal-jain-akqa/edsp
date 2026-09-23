@@ -2,14 +2,6 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
 import { moveInstrumentation } from '../../scripts/scripts.js';
 
 /**
- * @param {Element} row
- * @returns {boolean}
- */
-function isSlideRow(row) {
-  return Boolean(row.querySelector('picture, img'));
-}
-
-/**
  * @param {Element} cell
  * @returns {string}
  */
@@ -36,62 +28,59 @@ function wrapIndex(index, length) {
 }
 
 /**
- * Read key-value config rows: each row is [name cell, value cell].
- * @param {Element[]} rows
- * @returns {Record<string, Element>}
- */
-function readKeyValueConfig(rows) {
-  const config = {};
-  rows.forEach((row) => {
-    if (isSlideRow(row)) return;
-    const name = cellText(row.children[0]).toLowerCase();
-    const valueCell = row.children[1] || row.children[0];
-    if (name) config[name] = valueCell;
-  });
-  return config;
-}
-
-/**
- * @param {Record<string, Element>} config
+ * Header comes from default content in the same section (Title / Text / Button),
+ * matching how Cards keeps the parent as a filter-only container.
+ * @param {Element} block
  * @returns {HTMLElement}
  */
-function buildHeader(config) {
+function buildHeaderFromSection(block) {
   const header = document.createElement('div');
   header.className = 'carousel-header';
 
   const copy = document.createElement('div');
   copy.className = 'carousel-copy';
-
-  const eyebrowCell = config.eyebrow;
-  const titleCell = config.title;
-  const linkCell = config.link;
-
-  if (eyebrowCell && cellText(eyebrowCell)) {
-    const eyebrow = document.createElement('p');
-    eyebrow.className = 'carousel-eyebrow';
-    eyebrow.textContent = cellText(eyebrowCell);
-    moveInstrumentation(eyebrowCell, eyebrow);
-    copy.append(eyebrow);
-  }
-
-  if (titleCell && cellText(titleCell)) {
-    const title = document.createElement('h2');
-    title.className = 'carousel-title';
-    title.textContent = cellText(titleCell);
-    moveInstrumentation(titleCell, title);
-    copy.append(title);
-  }
-
   header.append(copy);
 
-  const ctaLink = findLink(linkCell);
-  if (ctaLink) {
+  const section = block.closest('.section');
+  const defaultContent = section?.querySelector(':scope > .default-content-wrapper');
+  if (!defaultContent) return header;
+
+  const heading = defaultContent.querySelector('h1, h2, h3, h4, h5, h6');
+  const button = defaultContent.querySelector('p.button-wrapper a, p.button-container a, a.button');
+  const eyebrowEl = [...defaultContent.querySelectorAll('p')].find((p) => {
+    if (p.querySelector('a')) return false;
+    const text = cellText(p);
+    return text && text.length <= 40;
+  });
+
+  if (eyebrowEl) {
+    const eyebrow = document.createElement('p');
+    eyebrow.className = 'carousel-eyebrow';
+    eyebrow.textContent = cellText(eyebrowEl);
+    copy.append(eyebrow);
+    eyebrowEl.remove();
+  }
+
+  if (heading) {
+    const title = document.createElement('h2');
+    title.className = 'carousel-title';
+    title.textContent = cellText(heading);
+    copy.append(title);
+    heading.remove();
+  }
+
+  if (button) {
     const actions = document.createElement('div');
     actions.className = 'carousel-actions';
-    ctaLink.className = 'carousel-discover';
-    if (linkCell) moveInstrumentation(linkCell, ctaLink);
-    actions.append(ctaLink);
+    const discover = button.cloneNode(true);
+    discover.className = 'carousel-discover';
+    actions.append(discover);
     header.append(actions);
+    button.closest('p')?.remove();
+  }
+
+  if (!defaultContent.querySelector('h1, h2, h3, h4, h5, h6, p, a, ul, ol')) {
+    defaultContent.remove();
   }
 
   return header;
@@ -162,7 +151,6 @@ function buildSlide(row) {
 }
 
 /**
- * Infinite loop carousel navigation.
  * @param {HTMLElement} track
  * @param {HTMLElement[]} slides
  * @param {HTMLButtonElement} prevBtn
@@ -219,11 +207,8 @@ function enableCarousel(track, slides, prevBtn, nextBtn) {
  * @param {Element} block
  */
 export default function decorate(block) {
-  const rows = [...block.children];
-  const config = readKeyValueConfig(rows);
-  const slideRows = rows.filter(isSlideRow);
-
-  const header = buildHeader(config);
+  const slideRows = [...block.children];
+  const header = buildHeaderFromSection(block);
 
   const stage = document.createElement('div');
   stage.className = 'carousel-stage';
@@ -233,7 +218,7 @@ export default function decorate(block) {
   track.setAttribute('tabindex', '0');
   track.setAttribute('role', 'region');
   track.setAttribute('aria-roledescription', 'carousel');
-  track.setAttribute('aria-label', cellText(config.title) || 'Carousel');
+  track.setAttribute('aria-label', header.querySelector('.carousel-title')?.textContent || 'Carousel');
 
   const slides = slideRows.map(buildSlide);
   slides.forEach((slide) => track.append(slide));
