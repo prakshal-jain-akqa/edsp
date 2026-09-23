@@ -189,55 +189,52 @@
         "name": "linkText",
         "label": "Button Text",
         "value": "Discover All"
+      }
+    ]
+  },
+  {
+    "id": "slide",
+    "fields": [
+      {
+        "component": "reference",
+        "valueType": "string",
+        "name": "image",
+        "label": "Image",
+        "multi": false
       },
       {
-        "component": "container",
-        "name": "slides",
-        "label": "Slides",
-        "multi": true,
-        "fields": [
-          {
-            "component": "reference",
-            "valueType": "string",
-            "name": "image",
-            "label": "Image",
-            "multi": false
-          },
-          {
-            "component": "text",
-            "valueType": "string",
-            "name": "imageAlt",
-            "label": "Image Alt",
-            "value": ""
-          },
-          {
-            "component": "text",
-            "valueType": "string",
-            "name": "title",
-            "label": "Slide Title",
-            "value": "Environment Conservation"
-          },
-          {
-            "component": "richtext",
-            "valueType": "string",
-            "name": "description",
-            "label": "Slide Description",
-            "value": ""
-          },
-          {
-            "component": "aem-content",
-            "valueType": "string",
-            "name": "cta",
-            "label": "Slide Link"
-          },
-          {
-            "component": "text",
-            "valueType": "string",
-            "name": "ctaText",
-            "label": "Slide Link Text",
-            "value": "View"
-          }
-        ]
+        "component": "text",
+        "valueType": "string",
+        "name": "imageAlt",
+        "label": "Image Alt",
+        "value": ""
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "title",
+        "label": "Title",
+        "value": "Environment Conservation"
+      },
+      {
+        "component": "richtext",
+        "valueType": "string",
+        "name": "description",
+        "label": "Description",
+        "value": ""
+      },
+      {
+        "component": "aem-content",
+        "valueType": "string",
+        "name": "link",
+        "label": "Link"
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "linkText",
+        "label": "Link Text",
+        "value": "View"
       }
     ]
   },
