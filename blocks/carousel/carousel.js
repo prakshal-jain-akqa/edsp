@@ -36,23 +36,37 @@ function wrapIndex(index, length) {
 }
 
 /**
- * Build the header from the first non-slide rows (eyebrow, title, CTA).
- * @param {Element[]} headerRows
+ * Read key-value config rows: each row is [name cell, value cell].
+ * @param {Element[]} rows
+ * @returns {Record<string, Element>}
+ */
+function readKeyValueConfig(rows) {
+  const config = {};
+  rows.forEach((row) => {
+    if (isSlideRow(row)) return;
+    const name = cellText(row.children[0]).toLowerCase();
+    const valueCell = row.children[1] || row.children[0];
+    if (name) config[name] = valueCell;
+  });
+  return config;
+}
+
+/**
+ * @param {Record<string, Element>} config
  * @returns {HTMLElement}
  */
-function buildHeader(headerRows) {
+function buildHeader(config) {
   const header = document.createElement('div');
   header.className = 'carousel-header';
 
   const copy = document.createElement('div');
   copy.className = 'carousel-copy';
 
-  const [eyebrowRow, titleRow, ctaRow] = headerRows;
-  const eyebrowCell = eyebrowRow?.firstElementChild;
-  const titleCell = titleRow?.firstElementChild;
-  const ctaCell = ctaRow?.firstElementChild;
+  const eyebrowCell = config.eyebrow;
+  const titleCell = config.title;
+  const linkCell = config.link;
 
-  if (cellText(eyebrowCell)) {
+  if (eyebrowCell && cellText(eyebrowCell)) {
     const eyebrow = document.createElement('p');
     eyebrow.className = 'carousel-eyebrow';
     eyebrow.textContent = cellText(eyebrowCell);
@@ -60,7 +74,7 @@ function buildHeader(headerRows) {
     copy.append(eyebrow);
   }
 
-  if (cellText(titleCell)) {
+  if (titleCell && cellText(titleCell)) {
     const title = document.createElement('h2');
     title.className = 'carousel-title';
     title.textContent = cellText(titleCell);
@@ -70,12 +84,12 @@ function buildHeader(headerRows) {
 
   header.append(copy);
 
-  const ctaLink = findLink(ctaCell);
+  const ctaLink = findLink(linkCell);
   if (ctaLink) {
     const actions = document.createElement('div');
     actions.className = 'carousel-actions';
     ctaLink.className = 'carousel-discover';
-    moveInstrumentation(ctaCell, ctaLink);
+    if (linkCell) moveInstrumentation(linkCell, ctaLink);
     actions.append(ctaLink);
     header.append(actions);
   }
@@ -206,11 +220,10 @@ function enableCarousel(track, slides, prevBtn, nextBtn) {
  */
 export default function decorate(block) {
   const rows = [...block.children];
-  const firstSlideIndex = rows.findIndex(isSlideRow);
-  const headerRows = firstSlideIndex === -1 ? rows : rows.slice(0, firstSlideIndex);
-  const slideRows = firstSlideIndex === -1 ? [] : rows.slice(firstSlideIndex);
+  const config = readKeyValueConfig(rows);
+  const slideRows = rows.filter(isSlideRow);
 
-  const header = buildHeader(headerRows);
+  const header = buildHeader(config);
 
   const stage = document.createElement('div');
   stage.className = 'carousel-stage';
@@ -220,7 +233,7 @@ export default function decorate(block) {
   track.setAttribute('tabindex', '0');
   track.setAttribute('role', 'region');
   track.setAttribute('aria-roledescription', 'carousel');
-  track.setAttribute('aria-label', cellText(headerRows[1]?.firstElementChild) || 'Carousel');
+  track.setAttribute('aria-label', cellText(config.title) || 'Carousel');
 
   const slides = slideRows.map(buildSlide);
   slides.forEach((slide) => track.append(slide));

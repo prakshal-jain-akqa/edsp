@@ -10,7 +10,8 @@
             "template": {
               "name": "Carousel",
               "model": "carousel",
-              "filter": "carousel"
+              "filter": "carousel",
+              "key-value": true
             }
           }
         }
