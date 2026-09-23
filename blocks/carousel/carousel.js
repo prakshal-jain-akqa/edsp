@@ -1,10 +1,11 @@
-import { createOptimizedPicture } from '../../scripts/aem.js';
-import { moveInstrumentation } from '../../scripts/scripts.js';
+import { createOptimizedPicture } from "../../scripts/aem.js";
+import { moveInstrumentation } from "../../scripts/scripts.js";
 
 /**
  * Container block (filter-only parent, like Cards):
- * - Carousel Header item → heading / subheading / button
- * - Slide items → cards
+ * - Carousel Header item → heading / subheading / button (one multi-cell row)
+ * - Or legacy/flat rows: one field per row before the slides
+ * - Slide items → cards (rows with an image)
  */
 
 /**
@@ -12,7 +13,7 @@ import { moveInstrumentation } from '../../scripts/scripts.js';
  * @returns {string}
  */
 function cellText(cell) {
-  return cell?.textContent.trim() || '';
+  return cell?.textContent.trim() || "";
 }
 
 /**
@@ -20,7 +21,19 @@ function cellText(cell) {
  * @returns {HTMLAnchorElement|null}
  */
 function findLink(cell) {
-  return cell?.querySelector('a') || null;
+  return cell?.querySelector("a") || null;
+}
+
+/**
+ * @param {Element} row
+ * @returns {string|null}
+ */
+function rowModel(row) {
+  return (
+    row.getAttribute("data-aue-model")
+    || row.querySelector("[data-aue-model]")?.getAttribute("data-aue-model")
+    || null
+  );
 }
 
 /**
@@ -28,11 +41,20 @@ function findLink(cell) {
  * @returns {boolean}
  */
 function isSlideRow(row) {
-  const model = row.getAttribute('data-aue-model')
-    || row.querySelector('[data-aue-model]')?.getAttribute('data-aue-model');
-  if (model === 'slide') return true;
-  if (model === 'carousel-header') return false;
-  return Boolean(row.querySelector('picture, img'));
+  const model = rowModel(row);
+  if (model === "slide") return true;
+  if (model === "carousel-header") return false;
+  return Boolean(row.querySelector("picture, img"));
+}
+
+/**
+ * Unwrap a single-cell row to its cell, or return the row itself.
+ * @param {Element} row
+ * @returns {Element}
+ */
+function rowCell(row) {
+  const cells = [...row.children];
+  return cells.length === 1 ? cells[0] : row;
 }
 
 /**
@@ -46,49 +68,57 @@ function wrapIndex(index, length) {
 }
 
 /**
- * Header item cells: heading, subheading, link (+ text collapsed).
- * @param {Element|undefined} row
+ * @param {Element|undefined} headingSrc
+ * @param {Element|undefined} subheadingSrc
+ * @param {Element|undefined} buttonSrc
+ * @param {Element|undefined} instrumentationSrc
  * @returns {HTMLElement}
  */
-function buildHeader(row) {
-  const header = document.createElement('div');
-  header.className = 'carousel-header';
+function buildHeader(headingSrc, subheadingSrc, buttonSrc, instrumentationSrc) {
+  const header = document.createElement("div");
+  header.className = "carousel-header";
 
-  const copy = document.createElement('div');
-  copy.className = 'carousel-copy';
+  const copy = document.createElement("div");
+  copy.className = "carousel-copy";
   header.append(copy);
 
-  if (!row) return header;
+  if (instrumentationSrc) moveInstrumentation(instrumentationSrc, header);
 
-  moveInstrumentation(row, header);
-
-  const cells = [...row.children];
-  const headingCell = cells[0];
-  const subheadingCell = cells[1];
-  const buttonCell = cells.find((cell) => cell.querySelector('a')) || cells[2];
-
-  if (cellText(subheadingCell)) {
-    const subheading = document.createElement('p');
-    subheading.className = 'carousel-subheading';
-    subheading.textContent = cellText(subheadingCell);
-    moveInstrumentation(subheadingCell, subheading);
+  if (cellText(subheadingSrc)) {
+    const subheading = document.createElement("p");
+    subheading.className = "carousel-subheading";
+    subheading.textContent = cellText(subheadingSrc);
+    moveInstrumentation(subheadingSrc, subheading);
     copy.append(subheading);
   }
 
-  if (cellText(headingCell)) {
-    const heading = document.createElement('h2');
-    heading.className = 'carousel-heading';
-    heading.textContent = cellText(headingCell);
-    moveInstrumentation(headingCell, heading);
+  if (cellText(headingSrc)) {
+    const heading = document.createElement("h2");
+    heading.className = "carousel-heading";
+    heading.textContent = cellText(headingSrc);
+    moveInstrumentation(headingSrc, heading);
     copy.append(heading);
   }
 
-  const buttonLink = findLink(buttonCell);
+  const buttonLink = findLink(buttonSrc);
   if (buttonLink) {
-    const actions = document.createElement('div');
-    actions.className = 'carousel-actions';
-    buttonLink.className = 'carousel-discover';
-    if (buttonCell) moveInstrumentation(buttonCell, buttonLink);
+    const actions = document.createElement("div");
+    actions.className = "carousel-actions";
+    buttonLink.className = "carousel-discover";
+    if (!cellText(buttonLink) && buttonSrc) {
+      const textOnly = [...buttonSrc.children].find(
+        (el) => el !== buttonLink && cellText(el),
+      );
+      if (textOnly) buttonLink.textContent = cellText(textOnly);
+      else if (cellText(buttonSrc) !== buttonLink.href) {
+        const leftover = cellText(buttonSrc);
+        if (leftover && leftover !== buttonLink.textContent) {
+          buttonLink.textContent = leftover;
+        }
+      }
+    }
+    if (!cellText(buttonLink)) buttonLink.textContent = "Discover All";
+    moveInstrumentation(buttonSrc, buttonLink);
     actions.append(buttonLink);
     header.append(actions);
   }
@@ -97,52 +127,95 @@ function buildHeader(row) {
 }
 
 /**
+ * Resolve header fields from either:
+ * - one multi-cell carousel-header row, or
+ * - leading single-cell rows (heading, subheading, button) before slides
+ * @param {Element[]} rows
+ * @returns {object} header field sources plus slideRows
+ */
+function partitionRows(rows) {
+  const slideRows = rows.filter(isSlideRow);
+  const nonSlideRows = rows.filter((row) => !isSlideRow(row));
+
+  const headerItem = nonSlideRows.find(
+    (row) => rowModel(row) === "carousel-header" || row.children.length > 1,
+  );
+
+  if (headerItem && headerItem.children.length > 1) {
+    const cells = [...headerItem.children];
+    const buttonCell = cells.find((cell) => cell.querySelector("a")) || cells[2];
+    return {
+      headingSrc: cells[0],
+      subheadingSrc: cells[1],
+      buttonSrc: buttonCell,
+      instrumentationSrc: headerItem,
+      slideRows,
+    };
+  }
+
+  // Flat / one-field-per-row header (current AEM output)
+  const sources = nonSlideRows.map(rowCell);
+  return {
+    headingSrc: sources[0],
+    subheadingSrc: sources[1],
+    buttonSrc:
+      sources.find((cell) => cell.querySelector("a")) || sources[2],
+    instrumentationSrc: nonSlideRows[0],
+    slideRows,
+  };
+}
+
+/**
  * Slide cells: image (+alt), title, description, link (+text).
  * @param {Element} row
  * @returns {HTMLElement}
  */
 function buildSlide(row) {
-  const slide = document.createElement('article');
-  slide.className = 'carousel-slide';
-  slide.setAttribute('role', 'group');
+  const slide = document.createElement("article");
+  slide.className = "carousel-slide";
+  slide.setAttribute("role", "group");
   moveInstrumentation(row, slide);
 
   const cells = [...row.children];
-  const imageCell = cells.find((cell) => cell.querySelector('picture, img')) || cells[0];
+  const imageCell = cells.find((cell) => cell.querySelector("picture, img")) || cells[0];
   const remaining = cells.filter((cell) => cell !== imageCell);
-  const linkCell = remaining.find((cell) => cell.querySelector('a'));
+  // Prefer the last cell with a link (CTA), not links inside description
+  const linkCell = [...remaining].reverse().find((cell) => cell.querySelector("a"))
+    || remaining[remaining.length - 1];
   const textCells = remaining.filter((cell) => cell !== linkCell);
   const titleCell = textCells[0];
   const descriptionCell = textCells[1];
 
-  const media = document.createElement('div');
-  media.className = 'carousel-media';
-  const img = imageCell?.querySelector('img');
+  const media = document.createElement("div");
+  media.className = "carousel-media";
+  const img = imageCell?.querySelector("img");
   if (img) {
-    const optimized = createOptimizedPicture(img.src, img.alt, false, [{ width: '1200' }]);
-    moveInstrumentation(img, optimized.querySelector('img'));
+    const optimized = createOptimizedPicture(img.src, img.alt, false, [
+      { width: "1200" },
+    ]);
+    moveInstrumentation(img, optimized.querySelector("img"));
     media.append(optimized);
   }
   if (imageCell) moveInstrumentation(imageCell, media);
   slide.append(media);
 
-  const overlay = document.createElement('div');
-  overlay.className = 'carousel-overlay';
+  const overlay = document.createElement("div");
+  overlay.className = "carousel-overlay";
 
-  const content = document.createElement('div');
-  content.className = 'carousel-content';
+  const content = document.createElement("div");
+  content.className = "carousel-content";
 
   if (titleCell && cellText(titleCell)) {
-    const title = document.createElement('h3');
-    title.className = 'carousel-slide-title';
+    const title = document.createElement("h3");
+    title.className = "carousel-slide-title";
     title.textContent = cellText(titleCell);
     moveInstrumentation(titleCell, title);
     content.append(title);
   }
 
   if (descriptionCell && cellText(descriptionCell)) {
-    const description = document.createElement('div');
-    description.className = 'carousel-slide-description';
+    const description = document.createElement("div");
+    description.className = "carousel-slide-description";
     description.append(...descriptionCell.childNodes);
     moveInstrumentation(descriptionCell, description);
     content.append(description);
@@ -152,7 +225,8 @@ function buildSlide(row) {
 
   const link = findLink(linkCell);
   if (link) {
-    link.className = 'carousel-view';
+    link.className = "carousel-view";
+    if (!cellText(link)) link.textContent = "View";
     if (linkCell) moveInstrumentation(linkCell, link);
     overlay.append(link);
   }
@@ -174,8 +248,8 @@ function enableCarousel(track, slides, prevBtn, nextBtn) {
     index = wrapIndex(nextIndex, slides.length);
 
     slides.forEach((slide, i) => {
-      slide.classList.toggle('is-active', i === index);
-      slide.setAttribute('aria-hidden', i === index ? 'false' : 'true');
+      slide.classList.toggle("is-active", i === index);
+      slide.setAttribute("aria-hidden", i === index ? "false" : "true");
     });
 
     const active = slides[index];
@@ -183,29 +257,30 @@ function enableCarousel(track, slides, prevBtn, nextBtn) {
 
     const trackRect = track.getBoundingClientRect();
     const slideRect = active.getBoundingClientRect();
-    const offset = (slideRect.left + slideRect.width / 2)
+    const offset = slideRect.left
+      + slideRect.width / 2
       - (trackRect.left + trackRect.width / 2)
       + track.scrollLeft;
-    track.scrollTo({ left: offset, behavior: 'smooth' });
+    track.scrollTo({ left: offset, behavior: "smooth" });
   };
 
-  prevBtn.addEventListener('click', () => goTo(index - 1));
-  nextBtn.addEventListener('click', () => goTo(index + 1));
+  prevBtn.addEventListener("click", () => goTo(index - 1));
+  nextBtn.addEventListener("click", () => goTo(index + 1));
 
   slides.forEach((slide, i) => {
-    slide.addEventListener('click', (event) => {
-      if (event.target.closest('a')) return;
+    slide.addEventListener("click", (event) => {
+      if (event.target.closest("a")) return;
       if (i === index) return;
       goTo(i);
     });
   });
 
-  track.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowLeft') {
+  track.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowLeft") {
       event.preventDefault();
       goTo(index - 1);
     }
-    if (event.key === 'ArrowRight') {
+    if (event.key === "ArrowRight") {
       event.preventDefault();
       goTo(index + 1);
     }
@@ -219,37 +294,47 @@ function enableCarousel(track, slides, prevBtn, nextBtn) {
  */
 export default function decorate(block) {
   const rows = [...block.children];
-  const headerRow = rows.find((row) => !isSlideRow(row));
-  const slideRows = rows.filter((row) => row !== headerRow);
+  const {
+    headingSrc,
+    subheadingSrc,
+    buttonSrc,
+    instrumentationSrc,
+    slideRows,
+  } = partitionRows(rows);
 
-  const header = buildHeader(headerRow);
+  const header = buildHeader(
+    headingSrc,
+    subheadingSrc,
+    buttonSrc,
+    instrumentationSrc,
+  );
 
-  const stage = document.createElement('div');
-  stage.className = 'carousel-stage';
+  const stage = document.createElement("div");
+  stage.className = "carousel-stage";
 
-  const track = document.createElement('div');
-  track.className = 'carousel-track';
-  track.setAttribute('tabindex', '0');
-  track.setAttribute('role', 'region');
-  track.setAttribute('aria-roledescription', 'carousel');
+  const track = document.createElement("div");
+  track.className = "carousel-track";
+  track.setAttribute("tabindex", "0");
+  track.setAttribute("role", "region");
+  track.setAttribute("aria-roledescription", "carousel");
   track.setAttribute(
-    'aria-label',
-    header.querySelector('.carousel-heading')?.textContent || 'Carousel',
+    "aria-label",
+    header.querySelector(".carousel-heading")?.textContent || "Carousel",
   );
 
   const slides = slideRows.map(buildSlide);
   slides.forEach((slide) => track.append(slide));
 
-  const prevBtn = document.createElement('button');
-  prevBtn.type = 'button';
-  prevBtn.className = 'carousel-nav carousel-nav-prev';
-  prevBtn.setAttribute('aria-label', 'Previous slide');
+  const prevBtn = document.createElement("button");
+  prevBtn.type = "button";
+  prevBtn.className = "carousel-nav carousel-nav-prev";
+  prevBtn.setAttribute("aria-label", "Previous slide");
   prevBtn.innerHTML = '<span aria-hidden="true">‹</span>';
 
-  const nextBtn = document.createElement('button');
-  nextBtn.type = 'button';
-  nextBtn.className = 'carousel-nav carousel-nav-next';
-  nextBtn.setAttribute('aria-label', 'Next slide');
+  const nextBtn = document.createElement("button");
+  nextBtn.type = "button";
+  nextBtn.className = "carousel-nav carousel-nav-next";
+  nextBtn.setAttribute("aria-label", "Next slide");
   nextBtn.innerHTML = '<span aria-hidden="true">›</span>';
 
   stage.append(track, prevBtn, nextBtn);
