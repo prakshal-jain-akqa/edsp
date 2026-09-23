@@ -28,6 +28,7 @@
   {
     "id": "carousel",
     "components": [
+      "carousel-header",
       "slide"
     ]
   },

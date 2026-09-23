@@ -9,8 +9,22 @@
             "resourceType": "core/franklin/components/block/v1/block",
             "template": {
               "name": "Carousel",
-              "model": "carousel",
               "filter": "carousel"
+            }
+          }
+        }
+      }
+    },
+    {
+      "title": "Carousel Header",
+      "id": "carousel-header",
+      "plugins": {
+        "xwalk": {
+          "page": {
+            "resourceType": "core/franklin/components/block/v1/block/item",
+            "template": {
+              "name": "Carousel Header",
+              "model": "carousel-header"
             }
           }
         }
@@ -34,7 +48,7 @@
   ],
   "models": [
     {
-      "id": "carousel",
+      "id": "carousel-header",
       "fields": [
         {
           "component": "text",
@@ -116,6 +130,7 @@
     {
       "id": "carousel",
       "components": [
+        "carousel-header",
         "slide"
       ]
     }

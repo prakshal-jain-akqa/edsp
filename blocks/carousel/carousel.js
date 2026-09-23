@@ -2,10 +2,9 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
 import { moveInstrumentation } from '../../scripts/scripts.js';
 
 /**
- * AEM container blocks render:
- * 1) parent model fields as single-cell rows
- * 2) each child item as a multi-cell row
- * @see https://www.aem.live/developer/component-model-definitions#container-blocks
+ * Container block (filter-only parent, like Cards):
+ * - Carousel Header item → heading / subheading / button
+ * - Slide items → cards
  */
 
 /**
@@ -25,11 +24,14 @@ function findLink(cell) {
 }
 
 /**
- * Slide rows contain an image (and usually multiple cells).
  * @param {Element} row
  * @returns {boolean}
  */
 function isSlideRow(row) {
+  const model = row.getAttribute('data-aue-model')
+    || row.querySelector('[data-aue-model]')?.getAttribute('data-aue-model');
+  if (model === 'slide') return true;
+  if (model === 'carousel-header') return false;
   return Boolean(row.querySelector('picture, img'));
 }
 
@@ -44,20 +46,26 @@ function wrapIndex(index, length) {
 }
 
 /**
- * Parent fields in model order: heading, subheading, link (+ linkText collapsed).
- * @param {Element[]} headerRows
+ * Header item cells: heading, subheading, link (+ text collapsed).
+ * @param {Element|undefined} row
  * @returns {HTMLElement}
  */
-function buildHeader(headerRows) {
+function buildHeader(row) {
   const header = document.createElement('div');
   header.className = 'carousel-header';
 
   const copy = document.createElement('div');
   copy.className = 'carousel-copy';
+  header.append(copy);
 
-  const headingCell = headerRows[0]?.firstElementChild;
-  const subheadingCell = headerRows[1]?.firstElementChild;
-  const buttonCell = headerRows[2]?.firstElementChild;
+  if (!row) return header;
+
+  moveInstrumentation(row, header);
+
+  const cells = [...row.children];
+  const headingCell = cells[0];
+  const subheadingCell = cells[1];
+  const buttonCell = cells.find((cell) => cell.querySelector('a')) || cells[2];
 
   if (cellText(subheadingCell)) {
     const subheading = document.createElement('p');
@@ -75,8 +83,6 @@ function buildHeader(headerRows) {
     copy.append(heading);
   }
 
-  header.append(copy);
-
   const buttonLink = findLink(buttonCell);
   if (buttonLink) {
     const actions = document.createElement('div');
@@ -91,7 +97,7 @@ function buildHeader(headerRows) {
 }
 
 /**
- * Slide cells after collapse: image (+alt), title, description, link (+text).
+ * Slide cells: image (+alt), title, description, link (+text).
  * @param {Element} row
  * @returns {HTMLElement}
  */
@@ -213,11 +219,10 @@ function enableCarousel(track, slides, prevBtn, nextBtn) {
  */
 export default function decorate(block) {
   const rows = [...block.children];
-  const firstSlideIndex = rows.findIndex(isSlideRow);
-  const headerRows = firstSlideIndex === -1 ? rows : rows.slice(0, firstSlideIndex);
-  const slideRows = firstSlideIndex === -1 ? [] : rows.slice(firstSlideIndex);
+  const headerRow = rows.find((row) => !isSlideRow(row));
+  const slideRows = rows.filter((row) => row !== headerRow);
 
-  const header = buildHeader(headerRows);
+  const header = buildHeader(headerRow);
 
   const stage = document.createElement('div');
   stage.className = 'carousel-stage';
@@ -227,7 +232,10 @@ export default function decorate(block) {
   track.setAttribute('tabindex', '0');
   track.setAttribute('role', 'region');
   track.setAttribute('aria-roledescription', 'carousel');
-  track.setAttribute('aria-label', cellText(headerRows[0]?.firstElementChild) || 'Carousel');
+  track.setAttribute(
+    'aria-label',
+    header.querySelector('.carousel-heading')?.textContent || 'Carousel',
+  );
 
   const slides = slideRows.map(buildSlide);
   slides.forEach((slide) => track.append(slide));

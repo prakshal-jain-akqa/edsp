@@ -161,7 +161,7 @@
     ]
   },
   {
-    "id": "carousel",
+    "id": "carousel-header",
     "fields": [
       {
         "component": "text",
