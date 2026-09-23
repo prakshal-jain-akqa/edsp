@@ -121,22 +121,11 @@
                 "resourceType": "core/franklin/components/block/v1/block",
                 "template": {
                   "name": "Carousel",
-                  "filter": "carousel"
-                }
-              }
-            }
-          }
-        },
-        {
-          "title": "Carousel Header",
-          "id": "carousel-header",
-          "plugins": {
-            "xwalk": {
-              "page": {
-                "resourceType": "core/franklin/components/block/v1/block/item",
-                "template": {
-                  "name": "Carousel Header",
-                  "model": "carousel-header"
+                  "model": "carousel",
+                  "filter": "carousel",
+                  "heading": "Progress Beyond the Road",
+                  "subheading": "THE IMPACT",
+                  "linkText": "Discover All"
                 }
               }
             }
@@ -151,7 +140,9 @@
                 "resourceType": "core/franklin/components/block/v1/block/item",
                 "template": {
                   "name": "Slide",
-                  "model": "slide"
+                  "model": "slide",
+                  "title": "Environment Conservation",
+                  "linkText": "View"
                 }
               }
             }

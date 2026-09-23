@@ -2,10 +2,10 @@ import { createOptimizedPicture } from "../../scripts/aem.js";
 import { moveInstrumentation } from "../../scripts/scripts.js";
 
 /**
- * Container block (filter-only parent, like Cards):
- * - Carousel Header item → heading / subheading / button (one multi-cell row)
- * - Or legacy/flat rows: one field per row before the slides
- * - Slide items → cards (rows with an image)
+ * Container block with top-level model + slide children:
+ * - Parent properties (heading, subheading, button) → single-cell rows
+ * - Optional legacy carousel-header item → one multi-cell row
+ * - Slide items → multi-cell rows with an image
  */
 
 /**
@@ -158,8 +158,7 @@ function partitionRows(rows) {
   return {
     headingSrc: sources[0],
     subheadingSrc: sources[1],
-    buttonSrc:
-      sources.find((cell) => cell.querySelector("a")) || sources[2],
+    buttonSrc: sources.find((cell) => cell.querySelector("a")) || sources[2],
     instrumentationSrc: nonSlideRows[0],
     slideRows,
   };
