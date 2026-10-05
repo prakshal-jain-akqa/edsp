@@ -235,37 +235,130 @@ function buildSlide(row) {
 }
 
 /**
+ * Triple-stack loop: [set A][set B][set C].
+ * Active window stays in the middle set so neighbors always peek on both sides.
+ *
  * @param {HTMLElement} track
- * @param {HTMLElement[]} slides
+ * @param {HTMLElement[]} slides full list including clones (3 × count)
  * @param {HTMLButtonElement} prevBtn
  * @param {HTMLButtonElement} nextBtn
+ * @param {number} count original slide count (one set)
  */
-function enableCarousel(track, slides, prevBtn, nextBtn) {
-  let index = 0;
+function enableCarousel(track, slides, prevBtn, nextBtn, count) {
+  const looped = count > 0 && slides.length === count * 3;
+  // First slide of the middle set — last of set A peeks on the left
+  let index = looped ? count : 0;
   let suppressClick = false;
+  let animating = false;
+  let settleToken = 0;
   const dragThreshold = 48;
+  const middleStart = count;
+  const middleEnd = count * 2; // exclusive
 
   /** @type {{ pointerId: number, startX: number, startScroll: number, moved: boolean } | null} */
   let drag = null;
 
-  const goTo = (nextIndex, behavior = "smooth") => {
-    index = wrapIndex(nextIndex, slides.length);
-
+  const markActive = (targetIndex) => {
     slides.forEach((slide, i) => {
-      slide.classList.toggle("is-active", i === index);
-      slide.setAttribute("aria-hidden", i === index ? "false" : "true");
+      const isActive = i === targetIndex;
+      slide.classList.toggle("is-active", isActive);
+      slide.setAttribute("aria-hidden", isActive ? "false" : "true");
     });
+  };
 
-    const active = slides[index];
+  const centerOffset = (slide) => slide.offsetLeft
+    + slide.offsetWidth / 2
+    - track.clientWidth / 2;
+
+  const setStride = () => {
+    if (!looped) return 0;
+    return slides[count].offsetLeft - slides[0].offsetLeft;
+  };
+
+  const nearestIndex = () => {
+    const center = track.scrollLeft + track.clientWidth / 2;
+    let best = 0;
+    let bestDist = Infinity;
+    slides.forEach((slide, i) => {
+      const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+      const dist = Math.abs(slideCenter - center);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = i;
+      }
+    });
+    return best;
+  };
+
+  const jumpByStride = (direction) => {
+    const stride = setStride();
+    if (!stride) return;
+    track.scrollLeft += stride * direction;
+    index += count * direction;
+  };
+
+  /** Keep the active index inside the middle set after outer-set landings. */
+  const normalizeToMiddle = () => {
+    if (!looped) return;
+    while (index < middleStart) jumpByStride(1);
+    while (index >= middleEnd) jumpByStride(-1);
+    markActive(index);
+  };
+
+  const scrollToSlide = (targetIndex, behavior = "smooth") => {
+    const active = slides[targetIndex];
     if (!active) return;
+    markActive(targetIndex);
+    track.scrollTo({ left: centerOffset(active), behavior });
+  };
 
-    const trackRect = track.getBoundingClientRect();
-    const slideRect = active.getBoundingClientRect();
-    const offset = slideRect.left
-      + slideRect.width / 2
-      - (trackRect.left + trackRect.width / 2)
-      + track.scrollLeft;
-    track.scrollTo({ left: offset, behavior });
+  const goTo = (nextIndex, behavior = "smooth") => {
+    if (!slides.length) return;
+    settleToken += 1;
+    const token = settleToken;
+
+    if (!looped) {
+      index = wrapIndex(nextIndex, slides.length);
+      scrollToSlide(index, behavior);
+      return;
+    }
+
+    let target = nextIndex;
+    // Crossed past the third set → step back one set, then advance
+    if (target >= slides.length) {
+      jumpByStride(-1);
+      target = index + 1;
+    } else if (target < 0) {
+      // Crossed before the first set → step forward one set, then go back
+      jumpByStride(1);
+      target = index - 1;
+    }
+
+    index = target;
+    scrollToSlide(index, behavior);
+
+    // While on the last middle slide, the first of set C already peeks on the right.
+    // Only snap back into the middle set after we land in an outer set.
+    const needsNormalize = index < middleStart || index >= middleEnd;
+
+    if (behavior === "auto") {
+      if (needsNormalize) normalizeToMiddle();
+      return;
+    }
+
+    if (!needsNormalize) {
+      animating = false;
+      return;
+    }
+
+    animating = true;
+    const settle = () => {
+      if (token !== settleToken) return;
+      animating = false;
+      normalizeToMiddle();
+    };
+    track.addEventListener("scrollend", settle, { once: true });
+    window.setTimeout(settle, 500);
   };
 
   const endDrag = (event) => {
@@ -281,6 +374,8 @@ function enableCarousel(track, slides, prevBtn, nextBtn) {
     } catch {
       // already released
     }
+
+    index = nearestIndex();
 
     if (moved) {
       suppressClick = true;
@@ -353,7 +448,44 @@ function enableCarousel(track, slides, prevBtn, nextBtn) {
     }
   });
 
-  goTo(0, "auto");
+  const layoutReady = () => slides[0]?.offsetWidth > 0
+    && (!looped || setStride() > 0);
+
+  const placeStart = () => {
+    index = looped ? middleStart : 0;
+    goTo(index, "auto");
+  };
+
+  const waitForLayout = () => {
+    if (layoutReady()) {
+      placeStart();
+      return;
+    }
+    requestAnimationFrame(waitForLayout);
+  };
+
+  waitForLayout();
+
+  const resize = new ResizeObserver(() => {
+    if (drag || animating || !layoutReady()) return;
+    scrollToSlide(index, "auto");
+  });
+  resize.observe(track);
+}
+
+/**
+ * Clone one full set of slides for the triple-stack loop.
+ * @param {HTMLElement[]} slides
+ * @returns {HTMLElement[]}
+ */
+function cloneSlides(slides) {
+  return slides.map((slide) => {
+    const clone = slide.cloneNode(true);
+    clone.classList.add("carousel-slide-clone");
+    clone.removeAttribute("id");
+    clone.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
+    return clone;
+  });
 }
 
 /**
@@ -389,7 +521,15 @@ export default function decorate(block) {
     header.querySelector(".carousel-heading")?.textContent || "Carousel",
   );
 
-  const slides = slideRows.map(buildSlide);
+  const originalSlides = slideRows.map(buildSlide);
+  // Triple stack: [A][B][C] — middle set is the active window
+  const slides = originalSlides.length
+    ? [
+      ...cloneSlides(originalSlides),
+      ...originalSlides,
+      ...cloneSlides(originalSlides),
+    ]
+    : [];
   slides.forEach((slide) => track.append(slide));
 
   const prevBtn = document.createElement("button");
@@ -407,8 +547,8 @@ export default function decorate(block) {
   stage.append(track, prevBtn, nextBtn);
   block.replaceChildren(header, stage);
 
-  if (slides.length) {
-    enableCarousel(track, slides, prevBtn, nextBtn);
+  if (originalSlides.length) {
+    enableCarousel(track, slides, prevBtn, nextBtn, originalSlides.length);
   } else {
     prevBtn.hidden = true;
     nextBtn.hidden = true;

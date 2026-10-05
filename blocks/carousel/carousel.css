@@ -107,8 +107,7 @@ main .section.carousel-container > .carousel-wrapper {
   gap: var(--carousel-gap);
   align-items: stretch;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   padding: 0 calc((100% - var(--carousel-slide-width)) / 2);
   scrollbar-width: none;
   outline: none;
@@ -119,8 +118,6 @@ main .section.carousel-container > .carousel-wrapper {
 
 .carousel .carousel-track.is-dragging {
   cursor: grabbing;
-  scroll-snap-type: none;
-  scroll-behavior: auto;
 }
 
 .carousel .carousel-track::-webkit-scrollbar {
@@ -133,7 +130,6 @@ main .section.carousel-container > .carousel-wrapper {
   min-height: min(58vw, 460px);
   border-radius: var(--carousel-card-radius);
   overflow: hidden;
-  scroll-snap-align: center;
   cursor: pointer;
   isolation: isolate;
 }
