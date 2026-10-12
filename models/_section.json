@@ -51,7 +51,9 @@
         "cards",
         "columns",
         "fragment",
-        "carousel"
+        "carousel",
+        "bento",
+        "banner"
       ]
     }
   ]

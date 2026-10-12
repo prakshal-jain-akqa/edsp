@@ -16,7 +16,21 @@
       "cards",
       "columns",
       "fragment",
-      "carousel"
+      "carousel",
+      "bento",
+      "banner"
+    ]
+  },
+  {
+    "id": "banner",
+    "components": [
+      "banner-slide"
+    ]
+  },
+  {
+    "id": "bento",
+    "components": [
+      "bento-item"
     ]
   },
   {
