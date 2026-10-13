@@ -129,8 +129,22 @@ async function loadNestedBlock(host, nested, blockName, hostRow) {
   nested.dataset.blockName = blockName;
   nested.dataset.blockStatus = "initialized";
 
-  if (hostRow && hostRow !== nested) {
+  // Only copy wrapper instrumentation when the nested node has none.
+  // Never overwrite nested data-aue-* (that removes filter and kills the + control).
+  if (
+    hostRow
+    && hostRow !== nested
+    && !nested.hasAttribute("data-aue-resource")
+  ) {
     moveInstrumentation(hostRow, nested);
+  }
+
+  // Ensure container filter stays available for Universal Editor
+  if (!nested.getAttribute("data-aue-filter")) {
+    nested.setAttribute("data-aue-filter", blockName);
+  }
+  if (!nested.getAttribute("data-aue-type")) {
+    nested.setAttribute("data-aue-type", "container");
   }
 
   wrapper.append(nested);

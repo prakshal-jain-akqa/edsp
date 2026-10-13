@@ -175,11 +175,6 @@
     ]
   },
   {
-    "id": "bento",
-    "container": true,
-    "fields": []
-  },
-  {
     "id": "bento-item",
     "fields": [
       {
