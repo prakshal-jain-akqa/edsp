@@ -83,6 +83,89 @@
       "id": "blocks",
       "components": [
         {
+          "title": "Banner",
+          "id": "banner",
+          "plugins": {
+            "xwalk": {
+              "page": {
+                "resourceType": "core/franklin/components/block/v1/block",
+                "template": {
+                  "name": "Banner",
+                  "model": "banner",
+                  "filter": "banner",
+                  "subtitle": "SECTION LABEL",
+                  "title": "Section Title",
+                  "linkText": "Discover All"
+                }
+              }
+            }
+          }
+        },
+        {
+          "title": "Carousel",
+          "id": "banner-carousel",
+          "plugins": {
+            "xwalk": {
+              "page": {
+                "resourceType": "core/franklin/components/block/v1/block/item",
+                "template": {
+                  "name": "Carousel",
+                  "model": "banner-carousel",
+                  "filter": "banner-carousel"
+                }
+              }
+            }
+          }
+        },
+        {
+          "title": "Bento",
+          "id": "banner-bento",
+          "plugins": {
+            "xwalk": {
+              "page": {
+                "resourceType": "core/franklin/components/block/v1/block/item",
+                "template": {
+                  "name": "Bento",
+                  "model": "banner-bento",
+                  "filter": "banner-bento"
+                }
+              }
+            }
+          }
+        },
+        {
+          "title": "Bento",
+          "id": "bento",
+          "plugins": {
+            "xwalk": {
+              "page": {
+                "resourceType": "core/franklin/components/block/v1/block",
+                "template": {
+                  "name": "Bento",
+                  "filter": "bento"
+                }
+              }
+            }
+          }
+        },
+        {
+          "title": "Bento Item",
+          "id": "bento-item",
+          "plugins": {
+            "xwalk": {
+              "page": {
+                "resourceType": "core/franklin/components/block/v1/block/item",
+                "template": {
+                  "name": "Bento Item",
+                  "model": "bento-item",
+                  "badge": "PHOTO",
+                  "title": "Title"
+                }
+              }
+            }
+          }
+        },
+        {
           "title": "Cards",
           "id": "cards",
           "plugins": {
@@ -107,6 +190,42 @@
                 "template": {
                   "name": "Card",
                   "model": "card"
+                }
+              }
+            }
+          }
+        },
+        {
+          "title": "Carousel",
+          "id": "carousel",
+          "plugins": {
+            "xwalk": {
+              "page": {
+                "resourceType": "core/franklin/components/block/v1/block",
+                "template": {
+                  "name": "Carousel",
+                  "model": "carousel",
+                  "filter": "carousel",
+                  "heading": "Progress Beyond the Road",
+                  "subheading": "THE IMPACT",
+                  "linkText": "Discover All"
+                }
+              }
+            }
+          }
+        },
+        {
+          "title": "Slide",
+          "id": "slide",
+          "plugins": {
+            "xwalk": {
+              "page": {
+                "resourceType": "core/franklin/components/block/v1/block/item",
+                "template": {
+                  "name": "Slide",
+                  "model": "slide",
+                  "title": "Environment Conservation",
+                  "linkText": "View"
                 }
               }
             }

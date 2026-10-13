@@ -15,13 +15,47 @@
       "hero",
       "cards",
       "columns",
-      "fragment"
+      "fragment",
+      "carousel",
+      "bento",
+      "banner"
+    ]
+  },
+  {
+    "id": "banner",
+    "components": [
+      "banner-carousel",
+      "banner-bento"
+    ]
+  },
+  {
+    "id": "banner-carousel",
+    "components": [
+      "slide"
+    ]
+  },
+  {
+    "id": "banner-bento",
+    "components": [
+      "bento-item"
+    ]
+  },
+  {
+    "id": "bento",
+    "components": [
+      "bento-item"
     ]
   },
   {
     "id": "cards",
     "components": [
       "card"
+    ]
+  },
+  {
+    "id": "carousel",
+    "components": [
+      "slide"
     ]
   },
   {
