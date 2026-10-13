@@ -22,7 +22,6 @@ module.exports = {
     'xwalk/max-cells': ['error', {
       '*': 4,
       slide: 4,
-      'banner-slide': 5,
       'bento-item': 4,
     }],
   },

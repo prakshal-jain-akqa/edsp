@@ -93,28 +93,9 @@
                   "name": "Banner",
                   "model": "banner",
                   "filter": "banner",
-                  "classes": "bento",
                   "subtitle": "SECTION LABEL",
                   "title": "Section Title",
                   "linkText": "Discover All"
-                }
-              }
-            }
-          }
-        },
-        {
-          "title": "Banner Slide",
-          "id": "banner-slide",
-          "plugins": {
-            "xwalk": {
-              "page": {
-                "resourceType": "core/franklin/components/block/v1/block/item",
-                "template": {
-                  "name": "Banner Slide",
-                  "model": "banner-slide",
-                  "badge": "PHOTO",
-                  "title": "Title",
-                  "linkText": "View"
                 }
               }
             }

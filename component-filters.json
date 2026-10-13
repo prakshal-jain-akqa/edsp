@@ -24,7 +24,8 @@
   {
     "id": "banner",
     "components": [
-      "banner-slide"
+      "carousel",
+      "bento"
     ]
   },
   {

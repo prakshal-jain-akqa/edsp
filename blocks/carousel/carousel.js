@@ -58,16 +58,6 @@ function rowCell(row) {
 }
 
 /**
- * @param {number} index
- * @param {number} length
- * @returns {number}
- */
-function wrapIndex(index, length) {
-  if (!length) return 0;
-  return ((index % length) + length) % length;
-}
-
-/**
  * @param {Element|undefined} headingSrc
  * @param {Element|undefined} subheadingSrc
  * @param {Element|undefined} buttonSrc
@@ -235,28 +225,32 @@ function buildSlide(row) {
 }
 
 /**
- * Triple-stack loop: [set A][set B][set C].
- * Active window stays in the middle set so neighbors always peek on both sides.
+ * Finite carousel: starts on slide 1 with the next peeking on the right.
+ * After moving, neighbors peek on left/right. Prev/next disable at the ends.
  *
  * @param {HTMLElement} track
- * @param {HTMLElement[]} slides full list including clones (3 × count)
+ * @param {HTMLElement[]} slides
  * @param {HTMLButtonElement} prevBtn
  * @param {HTMLButtonElement} nextBtn
- * @param {number} count original slide count (one set)
  */
-function enableCarousel(track, slides, prevBtn, nextBtn, count) {
-  const looped = count > 0 && slides.length === count * 3;
-  // First slide of the middle set — last of set A peeks on the left
-  let index = looped ? count : 0;
+function enableCarousel(track, slides, prevBtn, nextBtn) {
+  let index = 0;
   let suppressClick = false;
   let animating = false;
-  let settleToken = 0;
   const dragThreshold = 48;
-  const middleStart = count;
-  const middleEnd = count * 2; // exclusive
+  const lastIndex = slides.length - 1;
 
   /** @type {{ pointerId: number, startX: number, startScroll: number, moved: boolean } | null} */
   let drag = null;
+
+  const updateNav = () => {
+    const atStart = index <= 0;
+    const atEnd = index >= lastIndex;
+    prevBtn.disabled = atStart;
+    nextBtn.disabled = atEnd;
+    prevBtn.setAttribute("aria-disabled", atStart ? "true" : "false");
+    nextBtn.setAttribute("aria-disabled", atEnd ? "true" : "false");
+  };
 
   const markActive = (targetIndex) => {
     slides.forEach((slide, i) => {
@@ -269,11 +263,6 @@ function enableCarousel(track, slides, prevBtn, nextBtn, count) {
   const centerOffset = (slide) => slide.offsetLeft
     + slide.offsetWidth / 2
     - track.clientWidth / 2;
-
-  const setStride = () => {
-    if (!looped) return 0;
-    return slides[count].offsetLeft - slides[0].offsetLeft;
-  };
 
   const nearestIndex = () => {
     const center = track.scrollLeft + track.clientWidth / 2;
@@ -290,72 +279,28 @@ function enableCarousel(track, slides, prevBtn, nextBtn, count) {
     return best;
   };
 
-  const jumpByStride = (direction) => {
-    const stride = setStride();
-    if (!stride) return;
-    track.scrollLeft += stride * direction;
-    index += count * direction;
-  };
-
-  /** Keep the active index inside the middle set after outer-set landings. */
-  const normalizeToMiddle = () => {
-    if (!looped) return;
-    while (index < middleStart) jumpByStride(1);
-    while (index >= middleEnd) jumpByStride(-1);
-    markActive(index);
-  };
-
   const scrollToSlide = (targetIndex, behavior = "smooth") => {
     const active = slides[targetIndex];
     if (!active) return;
     markActive(targetIndex);
+    updateNav();
     track.scrollTo({ left: centerOffset(active), behavior });
   };
 
   const goTo = (nextIndex, behavior = "smooth") => {
     if (!slides.length) return;
-    settleToken += 1;
-    const token = settleToken;
-
-    if (!looped) {
-      index = wrapIndex(nextIndex, slides.length);
+    const target = Math.max(0, Math.min(lastIndex, nextIndex));
+    if (target === index && behavior !== "auto") {
       scrollToSlide(index, behavior);
       return;
     }
-
-    let target = nextIndex;
-    // Crossed past the third set → step back one set, then advance
-    if (target >= slides.length) {
-      jumpByStride(-1);
-      target = index + 1;
-    } else if (target < 0) {
-      // Crossed before the first set → step forward one set, then go back
-      jumpByStride(1);
-      target = index - 1;
-    }
-
     index = target;
     scrollToSlide(index, behavior);
 
-    // While on the last middle slide, the first of set C already peeks on the right.
-    // Only snap back into the middle set after we land in an outer set.
-    const needsNormalize = index < middleStart || index >= middleEnd;
-
-    if (behavior === "auto") {
-      if (needsNormalize) normalizeToMiddle();
-      return;
-    }
-
-    if (!needsNormalize) {
-      animating = false;
-      return;
-    }
-
+    if (behavior === "auto") return;
     animating = true;
     const settle = () => {
-      if (token !== settleToken) return;
       animating = false;
-      normalizeToMiddle();
     };
     track.addEventListener("scrollend", settle, { once: true });
     window.setTimeout(settle, 500);
@@ -426,8 +371,14 @@ function enableCarousel(track, slides, prevBtn, nextBtn, count) {
     true,
   );
 
-  prevBtn.addEventListener("click", () => goTo(index - 1));
-  nextBtn.addEventListener("click", () => goTo(index + 1));
+  prevBtn.addEventListener("click", () => {
+    if (prevBtn.disabled) return;
+    goTo(index - 1);
+  });
+  nextBtn.addEventListener("click", () => {
+    if (nextBtn.disabled) return;
+    goTo(index + 1);
+  });
 
   slides.forEach((slide, i) => {
     slide.addEventListener("click", (event) => {
@@ -440,20 +391,19 @@ function enableCarousel(track, slides, prevBtn, nextBtn, count) {
   track.addEventListener("keydown", (event) => {
     if (event.key === "ArrowLeft") {
       event.preventDefault();
-      goTo(index - 1);
+      if (!prevBtn.disabled) goTo(index - 1);
     }
     if (event.key === "ArrowRight") {
       event.preventDefault();
-      goTo(index + 1);
+      if (!nextBtn.disabled) goTo(index + 1);
     }
   });
 
-  const layoutReady = () => slides[0]?.offsetWidth > 0
-    && (!looped || setStride() > 0);
+  const layoutReady = () => slides[0]?.offsetWidth > 0;
 
   const placeStart = () => {
-    index = looped ? middleStart : 0;
-    goTo(index, "auto");
+    index = 0;
+    goTo(0, "auto");
   };
 
   const waitForLayout = () => {
@@ -471,21 +421,6 @@ function enableCarousel(track, slides, prevBtn, nextBtn, count) {
     scrollToSlide(index, "auto");
   });
   resize.observe(track);
-}
-
-/**
- * Clone one full set of slides for the triple-stack loop.
- * @param {HTMLElement[]} slides
- * @returns {HTMLElement[]}
- */
-function cloneSlides(slides) {
-  return slides.map((slide) => {
-    const clone = slide.cloneNode(true);
-    clone.classList.add("carousel-slide-clone");
-    clone.removeAttribute("id");
-    clone.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
-    return clone;
-  });
 }
 
 /**
@@ -521,15 +456,7 @@ export default function decorate(block) {
     header.querySelector(".carousel-heading")?.textContent || "Carousel",
   );
 
-  const originalSlides = slideRows.map(buildSlide);
-  // Triple stack: [A][B][C] — middle set is the active window
-  const slides = originalSlides.length
-    ? [
-      ...cloneSlides(originalSlides),
-      ...originalSlides,
-      ...cloneSlides(originalSlides),
-    ]
-    : [];
+  const slides = slideRows.map(buildSlide);
   slides.forEach((slide) => track.append(slide));
 
   const prevBtn = document.createElement("button");
@@ -547,8 +474,8 @@ export default function decorate(block) {
   stage.append(track, prevBtn, nextBtn);
   block.replaceChildren(header, stage);
 
-  if (originalSlides.length) {
-    enableCarousel(track, slides, prevBtn, nextBtn, originalSlides.length);
+  if (slides.length) {
+    enableCarousel(track, slides, prevBtn, nextBtn);
   } else {
     prevBtn.hidden = true;
     nextBtn.hidden = true;

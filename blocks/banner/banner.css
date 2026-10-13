@@ -77,7 +77,6 @@
   width: 100%;
 }
 
-/* Nested blocks: drop their own top padding when inside banner */
 .banner .banner-media-bento .bento {
   padding-left: 24px;
   padding-right: 24px;
@@ -88,6 +87,7 @@
   background: transparent;
 }
 
+/* Banner owns the section title — hide nested carousel header */
 .banner .banner-media-carousel .carousel-header {
   display: none;
 }

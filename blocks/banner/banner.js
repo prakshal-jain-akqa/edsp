@@ -4,9 +4,13 @@ import decorateBento from "../bento/bento.js";
 import decorateCarousel from "../carousel/carousel.js";
 
 /**
- * Banner: header (subtitle, title, CTA) + layout variant (bento | carousel).
- * Nested bento/carousel blocks render the authored slides.
+ * Banner = section header + a dropped nested block (Carousel or Bento).
  */
+
+const NESTED_BLOCKS = {
+  carousel: decorateCarousel,
+  bento: decorateBento,
+};
 
 /**
  * @param {Element} cell
@@ -17,84 +21,36 @@ function cellText(cell) {
 }
 
 /**
- * @param {Element} row
- * @returns {boolean}
+ * @param {Element} el
+ * @returns {string|null}
  */
-function isSlideRow(row) {
-  const model = row.getAttribute("data-aue-model")
-    || row.querySelector("[data-aue-model]")?.getAttribute("data-aue-model");
-  if (model === "banner-slide") return true;
-  return Boolean(row.querySelector("picture, img"));
-}
+function nestedBlockName(el) {
+  if (!el) return null;
+  const classMatch = Object.keys(NESTED_BLOCKS).find((name) => el.classList.contains(name));
+  if (classMatch) return classMatch;
 
-/**
- * @param {Element} row
- * @returns {object} slide cell references
- */
-function parseSlideCells(row) {
-  const cells = [...row.children];
-  const image = cells.find((cell) => cell.querySelector("picture, img")) || cells[0];
-  const remaining = cells.filter((cell) => cell !== image);
-  const link = [...remaining].reverse().find((cell) => cell.querySelector("a"))
-    || remaining[remaining.length - 1];
-  const textCells = remaining.filter((cell) => cell !== link);
-  // banner-slide order after image: badge, title, description
-  return {
-    image,
-    badge: textCells[0],
-    title: textCells[1],
-    description: textCells[2],
-    link,
-  };
-}
+  const model = el.getAttribute("data-aue-model")
+    || el.querySelector(":scope > [data-aue-model]")?.getAttribute("data-aue-model");
+  if (model && NESTED_BLOCKS[model]) return model;
 
-/**
- * @param {Element|undefined} source
- * @returns {HTMLElement}
- */
-function cloneCell(source) {
-  const cell = document.createElement("div");
-  if (source) {
-    cell.innerHTML = source.innerHTML;
+  const inner = el.querySelector(":scope > .carousel, :scope > .bento");
+  if (inner) {
+    return Object.keys(NESTED_BLOCKS).find((name) => inner.classList.contains(name)) || null;
   }
-  return cell;
+
+  return null;
 }
 
 /**
- * @param {Element[]} slideRows
- * @returns {HTMLElement[]}
+ * @param {Element} row
+ * @returns {HTMLElement|null}
  */
-function toBentoRows(slideRows) {
-  return slideRows.map((row) => {
-    const {
-      image, badge, title, link,
-    } = parseSlideCells(row);
-    const itemRow = document.createElement("div");
-    itemRow.append(cloneCell(image), cloneCell(badge), cloneCell(title), cloneCell(link));
-    moveInstrumentation(row, itemRow);
-    return itemRow;
-  });
-}
-
-/**
- * @param {Element[]} slideRows
- * @returns {HTMLElement[]}
- */
-function toCarouselSlideRows(slideRows) {
-  return slideRows.map((row) => {
-    const {
-      image, title, description, link,
-    } = parseSlideCells(row);
-    const itemRow = document.createElement("div");
-    itemRow.append(
-      cloneCell(image),
-      cloneCell(title),
-      cloneCell(description),
-      cloneCell(link),
-    );
-    moveInstrumentation(row, itemRow);
-    return itemRow;
-  });
+function extractNestedBlock(row) {
+  const name = nestedBlockName(row);
+  if (!name) return null;
+  if (row.classList.contains(name)) return /** @type {HTMLElement} */ (row);
+  const inner = row.querySelector(`:scope > .${name}`);
+  return /** @type {HTMLElement|null} */ (inner);
 }
 
 /**
@@ -138,26 +94,23 @@ function buildHeader(subtitleSrc, titleSrc, buttonSrc) {
 }
 
 /**
- * Mount a nested block without decorateBlock (avoids section class side-effects).
  * @param {HTMLElement} host
+ * @param {HTMLElement} nested
  * @param {string} blockName
- * @param {HTMLElement[]} rows
  */
-async function mountNestedBlock(host, blockName, rows) {
+async function loadNestedBlock(host, nested, blockName) {
   const wrapper = document.createElement("div");
   wrapper.className = `banner-media banner-media-${blockName} ${blockName}-wrapper`;
 
-  const nested = document.createElement("div");
-  nested.className = `${blockName} block`;
+  nested.classList.add("block");
   nested.dataset.blockName = blockName;
   nested.dataset.blockStatus = "initialized";
-  rows.forEach((row) => nested.append(row));
+
   wrapper.append(nested);
   host.append(wrapper);
 
   await loadCSS(`${window.hlx.codeBasePath}/blocks/${blockName}/${blockName}.css`);
-  const decorateFn = blockName === "carousel" ? decorateCarousel : decorateBento;
-  await decorateFn(nested);
+  await NESTED_BLOCKS[blockName](nested);
   nested.dataset.blockStatus = "loaded";
 }
 
@@ -165,34 +118,34 @@ async function mountNestedBlock(host, blockName, rows) {
  * @param {Element} block
  */
 export default async function decorate(block) {
-  const layout = block.classList.contains("carousel") ? "carousel" : "bento";
-  const rows = [...block.children];
-  const slideRows = rows.filter(isSlideRow);
-  const metaRows = rows.filter((row) => !isSlideRow(row));
+  const children = [...block.children];
+  const nestedEntries = [];
+  const metaRows = [];
 
-  // Parent fields render as single-cell rows: subtitle, title, link
-  // (layout/classes is applied on the block and should not be treated as copy)
-  const sources = metaRows
-    .map((row) => (row.children.length === 1 ? row.children[0] : row))
-    .filter((cell) => {
-      const text = cellText(cell).toLowerCase();
-      return text !== "bento" && text !== "carousel";
-    });
+  children.forEach((child) => {
+    const nested = extractNestedBlock(child);
+    const name = nested ? nestedBlockName(nested) || nestedBlockName(child) : null;
+    if (nested && name) {
+      nestedEntries.push({ nested, name, hostRow: child });
+    } else {
+      metaRows.push(child);
+    }
+  });
+
+  const sources = metaRows.map((row) => (
+    row.children.length === 1 ? row.children[0] : row
+  ));
   const subtitleSrc = sources[0];
   const titleSrc = sources[1];
   const buttonSrc = sources.find((cell) => cell.querySelector("a")) || sources[2];
 
   const header = buildHeader(subtitleSrc, titleSrc, buttonSrc);
-  const mediaHost = document.createElement("div");
-  mediaHost.className = "banner-body";
+  const body = document.createElement("div");
+  body.className = "banner-body";
 
-  block.replaceChildren(header, mediaHost);
+  block.replaceChildren(header, body);
 
-  if (layout === "carousel") {
-    // Banner already renders the section header; carousel only gets slides
-    await mountNestedBlock(mediaHost, "carousel", toCarouselSlideRows(slideRows));
-    return;
-  }
-
-  await mountNestedBlock(mediaHost, "bento", toBentoRows(slideRows));
+  await Promise.all(
+    nestedEntries.map(({ nested, name }) => loadNestedBlock(body, nested, name)),
+  );
 }

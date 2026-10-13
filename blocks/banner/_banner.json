@@ -11,28 +11,9 @@
               "name": "Banner",
               "model": "banner",
               "filter": "banner",
-              "classes": "bento",
               "subtitle": "SECTION LABEL",
               "title": "Section Title",
               "linkText": "Discover All"
-            }
-          }
-        }
-      }
-    },
-    {
-      "title": "Banner Slide",
-      "id": "banner-slide",
-      "plugins": {
-        "xwalk": {
-          "page": {
-            "resourceType": "core/franklin/components/block/v1/block/item",
-            "template": {
-              "name": "Banner Slide",
-              "model": "banner-slide",
-              "badge": "PHOTO",
-              "title": "Title",
-              "linkText": "View"
             }
           }
         }
@@ -69,76 +50,6 @@
           "name": "linkText",
           "label": "Button Text",
           "value": "Discover All"
-        },
-        {
-          "component": "select",
-          "name": "classes",
-          "label": "Layout",
-          "valueType": "string",
-          "value": "bento",
-          "options": [
-            {
-              "name": "Bento",
-              "value": "bento"
-            },
-            {
-              "name": "Image Carousel",
-              "value": "carousel"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "banner-slide",
-      "fields": [
-        {
-          "component": "reference",
-          "valueType": "string",
-          "name": "image",
-          "label": "Image",
-          "multi": false
-        },
-        {
-          "component": "text",
-          "valueType": "string",
-          "name": "imageAlt",
-          "label": "Image Alt",
-          "value": ""
-        },
-        {
-          "component": "text",
-          "valueType": "string",
-          "name": "badge",
-          "label": "Badge",
-          "value": "PHOTO"
-        },
-        {
-          "component": "text",
-          "valueType": "string",
-          "name": "title",
-          "label": "Title",
-          "value": "Title"
-        },
-        {
-          "component": "richtext",
-          "valueType": "string",
-          "name": "description",
-          "label": "Description",
-          "value": ""
-        },
-        {
-          "component": "aem-content",
-          "valueType": "string",
-          "name": "link",
-          "label": "Link"
-        },
-        {
-          "component": "text",
-          "valueType": "string",
-          "name": "linkText",
-          "label": "Link Text",
-          "value": "View"
         }
       ]
     }
@@ -147,7 +58,8 @@
     {
       "id": "banner",
       "components": [
-        "banner-slide"
+        "carousel",
+        "bento"
       ]
     }
   ]

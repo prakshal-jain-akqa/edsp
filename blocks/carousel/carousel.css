@@ -243,6 +243,13 @@ main .section.carousel-container > .carousel-wrapper {
   background: rgb(10 16 12 / 82%);
 }
 
+.carousel .carousel-nav:disabled,
+.carousel .carousel-nav[aria-disabled="true"] {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .carousel .carousel-nav-prev {
   left: max(12px, calc((100% - var(--carousel-slide-width)) / 2 - 12px));
 }
