@@ -24,8 +24,20 @@
   {
     "id": "banner",
     "components": [
-      "carousel",
-      "bento"
+      "banner-carousel",
+      "banner-bento"
+    ]
+  },
+  {
+    "id": "banner-carousel",
+    "components": [
+      "slide"
+    ]
+  },
+  {
+    "id": "banner-bento",
+    "components": [
+      "bento-item"
     ]
   },
   {

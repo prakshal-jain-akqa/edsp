@@ -4,10 +4,18 @@ import decorateBento from "../bento/bento.js";
 import decorateCarousel from "../carousel/carousel.js";
 
 /**
- * Banner = section header + a dropped nested block (Carousel or Bento).
+ * Banner = header fields + nestable media items (Carousel / Bento).
+ * Media children are block/items so Universal Editor can show + for slides.
  */
 
-const NESTED_BLOCKS = {
+const MEDIA_TYPES = {
+  "banner-carousel": "carousel",
+  carousel: "carousel",
+  "banner-bento": "bento",
+  bento: "bento",
+};
+
+const DECORATORS = {
   carousel: decorateCarousel,
   bento: decorateBento,
 };
@@ -22,54 +30,24 @@ function cellText(cell) {
 
 /**
  * @param {Element} el
- * @returns {string|null}
+ * @returns {string|null} 'carousel' | 'bento' | null
  */
-function nestedBlockName(el) {
+function mediaTypeOf(el) {
   if (!el) return null;
 
-  const classMatch = Object.keys(NESTED_BLOCKS).find((name) => el.classList.contains(name));
-  if (classMatch) return classMatch;
+  if (el.classList.contains("carousel")) return "carousel";
+  if (el.classList.contains("bento")) return "bento";
 
   const model = el.getAttribute("data-aue-model")
     || el.querySelector(":scope > [data-aue-model]")?.getAttribute("data-aue-model");
-  if (model && NESTED_BLOCKS[model]) return model;
+  if (model && MEDIA_TYPES[model]) return MEDIA_TYPES[model];
 
   const label = (el.getAttribute("data-aue-label") || "").toLowerCase();
   if (label === "carousel" || label === "bento") return label;
 
-  const inner = el.querySelector(":scope > .carousel, :scope > .bento");
-  if (inner) {
-    return Object.keys(NESTED_BLOCKS).find((name) => inner.classList.contains(name)) || null;
-  }
-
-  return null;
-}
-
-/**
- * Resolve the element that should be decorated as the nested block.
- * UE often inserts components with data-aue-model before the block class exists.
- * @param {Element} row
- * @returns {{ nested: HTMLElement, name: string }|null}
- */
-function findNestedBlock(row) {
-  const directName = nestedBlockName(row);
-  if (directName) {
-    if (row.classList.contains(directName)) {
-      return { nested: /** @type {HTMLElement} */ (row), name: directName };
-    }
-    const inner = row.querySelector(`:scope > .${directName}`);
-    if (inner) {
-      return { nested: /** @type {HTMLElement} */ (inner), name: directName };
-    }
-    // Fresh UE insert: model/label present, class not yet applied
-    return { nested: /** @type {HTMLElement} */ (row), name: directName };
-  }
-
-  const wrapped = row.querySelector(":scope > .carousel, :scope > .bento");
-  if (wrapped) {
-    const name = Object.keys(NESTED_BLOCKS).find((n) => wrapped.classList.contains(n));
-    if (name) return { nested: /** @type {HTMLElement} */ (wrapped), name };
-  }
+  const filter = el.getAttribute("data-aue-filter") || "";
+  if (filter === "banner-carousel" || filter === "carousel") return "carousel";
+  if (filter === "banner-bento" || filter === "bento") return "bento";
 
   return null;
 }
@@ -115,44 +93,34 @@ function buildHeader(subtitleSrc, titleSrc, buttonSrc) {
 }
 
 /**
+ * Keep the authored media node as the block root so UE filter/+ stay attached.
  * @param {HTMLElement} host
- * @param {HTMLElement} nested
+ * @param {HTMLElement} mediaEl
  * @param {string} blockName
- * @param {Element} [hostRow]
  */
-async function loadNestedBlock(host, nested, blockName, hostRow) {
+async function loadMediaBlock(host, mediaEl, blockName) {
   const wrapper = document.createElement("div");
   wrapper.className = `banner-media banner-media-${blockName} ${blockName}-wrapper`;
 
-  // Ensure block class exists (UE inserts may only have data-aue-model)
-  nested.classList.add(blockName, "block");
-  nested.dataset.blockName = blockName;
-  nested.dataset.blockStatus = "initialized";
+  mediaEl.classList.add(blockName, "block");
+  mediaEl.dataset.blockName = blockName;
+  mediaEl.dataset.blockStatus = "initialized";
 
-  // Only copy wrapper instrumentation when the nested node has none.
-  // Never overwrite nested data-aue-* (that removes filter and kills the + control).
-  if (
-    hostRow
-    && hostRow !== nested
-    && !nested.hasAttribute("data-aue-resource")
-  ) {
-    moveInstrumentation(hostRow, nested);
+  // Preserve / restore container instrumentation for +
+  const filterId = blockName === "carousel" ? "banner-carousel" : "banner-bento";
+  if (!mediaEl.getAttribute("data-aue-filter")) {
+    mediaEl.setAttribute("data-aue-filter", filterId);
+  }
+  if (!mediaEl.getAttribute("data-aue-type")) {
+    mediaEl.setAttribute("data-aue-type", "container");
   }
 
-  // Ensure container filter stays available for Universal Editor
-  if (!nested.getAttribute("data-aue-filter")) {
-    nested.setAttribute("data-aue-filter", blockName);
-  }
-  if (!nested.getAttribute("data-aue-type")) {
-    nested.setAttribute("data-aue-type", "container");
-  }
-
-  wrapper.append(nested);
+  wrapper.append(mediaEl);
   host.append(wrapper);
 
   await loadCSS(`${window.hlx.codeBasePath}/blocks/${blockName}/${blockName}.css`);
-  await NESTED_BLOCKS[blockName](nested);
-  nested.dataset.blockStatus = "loaded";
+  await DECORATORS[blockName](mediaEl);
+  mediaEl.dataset.blockStatus = "loaded";
 }
 
 /**
@@ -160,13 +128,13 @@ async function loadNestedBlock(host, nested, blockName, hostRow) {
  */
 export default async function decorate(block) {
   const children = [...block.children];
-  const nestedEntries = [];
+  const mediaEntries = [];
   const metaRows = [];
 
   children.forEach((child) => {
-    const found = findNestedBlock(child);
-    if (found) {
-      nestedEntries.push({ ...found, hostRow: child });
+    const type = mediaTypeOf(child);
+    if (type) {
+      mediaEntries.push({ el: /** @type {HTMLElement} */ (child), type });
     } else {
       metaRows.push(child);
     }
@@ -186,8 +154,6 @@ export default async function decorate(block) {
   block.replaceChildren(header, body);
 
   await Promise.all(
-    nestedEntries.map(({ nested, name, hostRow }) => (
-      loadNestedBlock(body, nested, name, hostRow)
-    )),
+    mediaEntries.map(({ el, type }) => loadMediaBlock(body, el, type)),
   );
 }

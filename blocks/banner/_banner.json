@@ -18,6 +18,38 @@
           }
         }
       }
+    },
+    {
+      "title": "Carousel",
+      "id": "banner-carousel",
+      "plugins": {
+        "xwalk": {
+          "page": {
+            "resourceType": "core/franklin/components/block/v1/block/item",
+            "template": {
+              "name": "Carousel",
+              "model": "banner-carousel",
+              "filter": "banner-carousel"
+            }
+          }
+        }
+      }
+    },
+    {
+      "title": "Bento",
+      "id": "banner-bento",
+      "plugins": {
+        "xwalk": {
+          "page": {
+            "resourceType": "core/franklin/components/block/v1/block/item",
+            "template": {
+              "name": "Bento",
+              "model": "banner-bento",
+              "filter": "banner-bento"
+            }
+          }
+        }
+      }
     }
   ],
   "models": [
@@ -53,14 +85,36 @@
           "value": "Discover All"
         }
       ]
+    },
+    {
+      "id": "banner-carousel",
+      "container": true,
+      "fields": []
+    },
+    {
+      "id": "banner-bento",
+      "container": true,
+      "fields": []
     }
   ],
   "filters": [
     {
       "id": "banner",
       "components": [
-        "carousel",
-        "bento"
+        "banner-carousel",
+        "banner-bento"
+      ]
+    },
+    {
+      "id": "banner-carousel",
+      "components": [
+        "slide"
+      ]
+    },
+    {
+      "id": "banner-bento",
+      "components": [
+        "bento-item"
       ]
     }
   ]

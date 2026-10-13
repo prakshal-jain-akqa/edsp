@@ -102,6 +102,38 @@
           }
         },
         {
+          "title": "Carousel",
+          "id": "banner-carousel",
+          "plugins": {
+            "xwalk": {
+              "page": {
+                "resourceType": "core/franklin/components/block/v1/block/item",
+                "template": {
+                  "name": "Carousel",
+                  "model": "banner-carousel",
+                  "filter": "banner-carousel"
+                }
+              }
+            }
+          }
+        },
+        {
+          "title": "Bento",
+          "id": "banner-bento",
+          "plugins": {
+            "xwalk": {
+              "page": {
+                "resourceType": "core/franklin/components/block/v1/block/item",
+                "template": {
+                  "name": "Bento",
+                  "model": "banner-bento",
+                  "filter": "banner-bento"
+                }
+              }
+            }
+          }
+        },
+        {
           "title": "Bento",
           "id": "bento",
           "plugins": {

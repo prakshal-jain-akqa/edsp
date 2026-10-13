@@ -175,6 +175,16 @@
     ]
   },
   {
+    "id": "banner-carousel",
+    "container": true,
+    "fields": []
+  },
+  {
+    "id": "banner-bento",
+    "container": true,
+    "fields": []
+  },
+  {
     "id": "bento-item",
     "fields": [
       {
