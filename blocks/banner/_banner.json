@@ -23,6 +23,7 @@
   "models": [
     {
       "id": "banner",
+      "container": true,
       "fields": [
         {
           "component": "text",
