@@ -26,12 +26,16 @@ function cellText(cell) {
  */
 function nestedBlockName(el) {
   if (!el) return null;
+
   const classMatch = Object.keys(NESTED_BLOCKS).find((name) => el.classList.contains(name));
   if (classMatch) return classMatch;
 
   const model = el.getAttribute("data-aue-model")
     || el.querySelector(":scope > [data-aue-model]")?.getAttribute("data-aue-model");
   if (model && NESTED_BLOCKS[model]) return model;
+
+  const label = (el.getAttribute("data-aue-label") || "").toLowerCase();
+  if (label === "carousel" || label === "bento") return label;
 
   const inner = el.querySelector(":scope > .carousel, :scope > .bento");
   if (inner) {
@@ -42,15 +46,32 @@ function nestedBlockName(el) {
 }
 
 /**
+ * Resolve the element that should be decorated as the nested block.
+ * UE often inserts components with data-aue-model before the block class exists.
  * @param {Element} row
- * @returns {HTMLElement|null}
+ * @returns {{ nested: HTMLElement, name: string }|null}
  */
-function extractNestedBlock(row) {
-  const name = nestedBlockName(row);
-  if (!name) return null;
-  if (row.classList.contains(name)) return /** @type {HTMLElement} */ (row);
-  const inner = row.querySelector(`:scope > .${name}`);
-  return /** @type {HTMLElement|null} */ (inner);
+function findNestedBlock(row) {
+  const directName = nestedBlockName(row);
+  if (directName) {
+    if (row.classList.contains(directName)) {
+      return { nested: /** @type {HTMLElement} */ (row), name: directName };
+    }
+    const inner = row.querySelector(`:scope > .${directName}`);
+    if (inner) {
+      return { nested: /** @type {HTMLElement} */ (inner), name: directName };
+    }
+    // Fresh UE insert: model/label present, class not yet applied
+    return { nested: /** @type {HTMLElement} */ (row), name: directName };
+  }
+
+  const wrapped = row.querySelector(":scope > .carousel, :scope > .bento");
+  if (wrapped) {
+    const name = Object.keys(NESTED_BLOCKS).find((n) => wrapped.classList.contains(n));
+    if (name) return { nested: /** @type {HTMLElement} */ (wrapped), name };
+  }
+
+  return null;
 }
 
 /**
@@ -97,14 +118,20 @@ function buildHeader(subtitleSrc, titleSrc, buttonSrc) {
  * @param {HTMLElement} host
  * @param {HTMLElement} nested
  * @param {string} blockName
+ * @param {Element} [hostRow]
  */
-async function loadNestedBlock(host, nested, blockName) {
+async function loadNestedBlock(host, nested, blockName, hostRow) {
   const wrapper = document.createElement("div");
   wrapper.className = `banner-media banner-media-${blockName} ${blockName}-wrapper`;
 
-  nested.classList.add("block");
+  // Ensure block class exists (UE inserts may only have data-aue-model)
+  nested.classList.add(blockName, "block");
   nested.dataset.blockName = blockName;
   nested.dataset.blockStatus = "initialized";
+
+  if (hostRow && hostRow !== nested) {
+    moveInstrumentation(hostRow, nested);
+  }
 
   wrapper.append(nested);
   host.append(wrapper);
@@ -123,10 +150,9 @@ export default async function decorate(block) {
   const metaRows = [];
 
   children.forEach((child) => {
-    const nested = extractNestedBlock(child);
-    const name = nested ? nestedBlockName(nested) || nestedBlockName(child) : null;
-    if (nested && name) {
-      nestedEntries.push({ nested, name, hostRow: child });
+    const found = findNestedBlock(child);
+    if (found) {
+      nestedEntries.push({ ...found, hostRow: child });
     } else {
       metaRows.push(child);
     }
@@ -146,6 +172,8 @@ export default async function decorate(block) {
   block.replaceChildren(header, body);
 
   await Promise.all(
-    nestedEntries.map(({ nested, name }) => loadNestedBlock(body, nested, name)),
+    nestedEntries.map(({ nested, name, hostRow }) => (
+      loadNestedBlock(body, nested, name, hostRow)
+    )),
   );
 }

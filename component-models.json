@@ -175,6 +175,11 @@
     ]
   },
   {
+    "id": "bento",
+    "container": true,
+    "fields": []
+  },
+  {
     "id": "bento-item",
     "fields": [
       {
@@ -241,6 +246,7 @@
   },
   {
     "id": "carousel",
+    "container": true,
     "fields": [
       {
         "component": "text",
